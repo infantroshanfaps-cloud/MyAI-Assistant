@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,7 +61,6 @@ body{overflow:hidden;background:var(--bg-base);color:var(--text-main);line-heigh
 button,input,select,textarea{font:inherit;color:inherit;outline:none}
 button{cursor:pointer}
 .app{height:100vh;width:100%;display:block}
-
 .sidebar{position:fixed;top:0;left:-360px;width:320px;max-width:88vw;height:100vh;z-index:10002;
   background:var(--bg-surface);box-shadow:var(--shadow-lg);padding:0;display:flex;flex-direction:column;gap:0;
   border-right:1px solid var(--border-color);transition:left .3s cubic-bezier(.4,0,.2,1)}
@@ -101,6 +99,7 @@ button{cursor:pointer}
 .model-status.checking::before{background:var(--warning)}
 .model-status.unavailable{color:var(--danger);border-color:rgba(229,62,62,.35);background:var(--accent-soft)}
 .model-status.unavailable::before{background:var(--danger)}
+.model-status .status-detail{font-weight:650;opacity:.8}
 .top-actions{display:flex;align-items:center;gap:10px}
 .temp-pill{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-full);
   color:var(--accent);font-size:12px;font-weight:700;background:var(--accent-soft);white-space:nowrap}
@@ -213,30 +212,16 @@ body.night-theme .settings-card{background:var(--bg-surface)}
 }
 </style>
 </head>
-
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand-row">
-      <div class="brand">
-        <div class="brand-mark">
-          <svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/>
-            <path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/>
-            <path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/>
-            <path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/>
-            <path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <span>ROSE AI</span>
-      </div>
+      <div class="brand"><div class="brand-mark"><svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/><path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/><path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/><path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/><path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/></svg></div><span>ROSE AI</span></div>
       <button class="icon-btn" onclick="closeSidebar()" aria-label="Close sidebar">‹</button>
     </div>
-
-    <button class="side-btn primary" onclick="newChat()">＋ New chat</button>
+    <button class="side-btn primary" onclick="newChat()"><span>＋</span> New chat</button>
     <div class="side-label">Your space</div>
-    <button class="side-btn" onclick="showTemporaryInfo()">◷ Temporary chat</button>
+    <button class="side-btn" onclick="showTemporaryInfo()"><span>◷</span> Temporary chat</button>
     <div class="side-note">Temporary mode is on.<br>Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.</div>
   </aside>
 
@@ -248,12 +233,12 @@ body.night-theme .settings-card{background:var(--bg-surface)}
         <button class="icon-btn mobile-menu" onclick="openSidebar()" aria-label="Open menu">☰</button>
         <div class="top-title">ROSE AI <span style="color:#888;font-weight:400">⌄</span></div>
       </div>
-
       <div class="top-actions">
         <select class="model-select" id="modelSelect" aria-label="Choose an available AI model" title="Models available to your API key">
           <option value="">Loading models...</option>
         </select>
         <span class="model-status checking" id="modelStatus" role="status" aria-live="polite">CHECKING</span>
+        <button class="icon-btn" id="refreshModelStatus" onclick="checkAllModels(true)" title="Test all models now" aria-label="Test all models now">↻</button>
         <button class="icon-btn" onclick="openSettings()" title="Appearance settings" aria-label="Appearance settings">⚙</button>
         <div class="temp-pill"><span class="temp-dot"></span> Temporary chat</div>
       </div>
@@ -264,16 +249,7 @@ body.night-theme .settings-card{background:var(--bg-surface)}
     <section class="chat-scroll" id="chatScroll">
       <div class="chat-content" id="chatContent">
         <div class="welcome" id="welcome">
-          <div class="welcome-mark">
-            <svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/>
-              <path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/>
-              <path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/>
-              <path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/>
-              <path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <div class="welcome-mark"><svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/><path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/><path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/><path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/><path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/></svg></div>
           <h1>What can I help you <span>with?</span></h1>
           <p>Ask a question, explore an idea, or get something done.</p>
           <div class="suggestions">
@@ -306,10 +282,7 @@ body.night-theme .settings-card{background:var(--bg-surface)}
 
 <div class="settings-modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" onclick="if(event.target===this)closeSettings()">
   <div class="settings-card">
-    <div class="settings-head">
-      <h2 id="settingsTitle">Appearance settings</h2>
-      <button class="settings-close" onclick="closeSettings()" aria-label="Close settings">×</button>
-    </div>
+    <div class="settings-head"><h2 id="settingsTitle">Appearance settings</h2><button class="settings-close" onclick="closeSettings()" aria-label="Close settings">×</button></div>
     <div class="setting-group">
       <label class="setting-label" for="themeSelect">Theme</label>
       <select class="setting-select" id="themeSelect" onchange="setTheme(this.value)">
@@ -318,22 +291,13 @@ body.night-theme .settings-card{background:var(--bg-surface)}
         <option value="time-based">Auto</option>
       </select>
     </div>
-    <div class="setting-group">
-      <label class="setting-label" for="accentSelect">Accent colour</label>
-      <select class="setting-select" id="accentSelect" onchange="setAccent(this.value)">
-        <option value="#e53e3e">Rose Red</option>
-        <option value="#3182ce">Rose Blue</option>
-        <option value="#38a169">Green</option>
-        <option value="#805ad5">Purple</option>
-        <option value="#ed64a6">Pink</option>
-      </select>
-      <p class="setting-help">Your appearance choices are saved in this browser.</p>
-    </div>
   </div>
 </div>
 
 <script>
 const chatContent = document.getElementById("chatContent");
+loadGeminiModels();
+
 const chatScroll = document.getElementById("chatScroll");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -343,14 +307,13 @@ let busy = false;
 let selectedFiles = [];
 let recognition = null;
 let currentlySpeakingButton = null;
-let availableGeminiModels = [];
-let selectedGeminiModel = "";
-let modelIsUnavailable = false;
-let shouldAutoScroll = true;
 
 if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 }
+
+let shouldAutoScroll = true;
 
 function scrollToBottom(force = false){
   if(force || shouldAutoScroll){
@@ -361,6 +324,7 @@ function scrollToBottom(force = false){
 chatScroll.addEventListener("scroll", () => {
   const distanceFromBottom =
     chatScroll.scrollHeight - chatScroll.scrollTop - chatScroll.clientHeight;
+
   shouldAutoScroll = distanceFromBottom < 70;
 });
 
@@ -368,54 +332,57 @@ function showToast(message){
   const toast=document.getElementById("toast");
   toast.textContent=message;
   toast.style.display="block";
+
   clearTimeout(showToast.timer);
-  showToast.timer=setTimeout(()=>toast.style.display="none",3000);
+
+  showToast.timer=setTimeout(()=>{
+    toast.style.display="none";
+  },2600);
 }
 
 // Appearance settings
 function openSettings(){
   document.getElementById("settingsModal").classList.add("open");
 }
+
 function closeSettings(){
   document.getElementById("settingsModal").classList.remove("open");
 }
+
 function setTheme(choice){
   const hour = new Date().getHours();
-  const isDark = choice === "dark" ||
+
+  const isDark =
+    choice === "dark" ||
     (choice === "time-based" && (hour >= 16 || hour < 4));
 
   document.body.classList.toggle("night-theme", isDark);
-  document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+
+  document.documentElement.style.colorScheme =
+    isDark ? "dark" : "light";
+
   localStorage.setItem("rose_theme_pref", choice);
 }
-function setAccent(color){
-  const root=document.documentElement;
-  root.style.setProperty("--accent", color);
 
-  const hex=color.replace("#","");
-  const rgb=hex.length===6
-    ? `${parseInt(hex.slice(0,2),16)}, ${parseInt(hex.slice(2,4),16)}, ${parseInt(hex.slice(4,6),16)}`
-    : "229, 62, 62";
-
-  root.style.setProperty("--accent-glow",`rgba(${rgb}, .22)`);
-  root.style.setProperty("--accent-soft",`rgba(${rgb}, .08)`);
-  root.style.setProperty("--accent-border",`rgba(${rgb}, .28)`);
-  localStorage.setItem("rose-accent", color);
-}
 (function loadAppearance(){
-  const savedTheme=localStorage.getItem("rose_theme_pref")||"time-based";
-  const savedAccent=localStorage.getItem("rose-accent")||"#e53e3e";
+  let savedTheme=localStorage.getItem("rose_theme_pref");
+
+  if(!savedTheme){
+    const oldTheme=localStorage.getItem("brownie-theme-choice");
+
+    savedTheme=oldTheme==="system"
+      ? "time-based"
+      : (oldTheme||"time-based");
+  }
 
   document.getElementById("themeSelect").value=savedTheme;
-  document.getElementById("accentSelect").value=savedAccent;
-
   setTheme(savedTheme);
-  setAccent(savedAccent);
 })();
 
 // Voice input
 function toggleVoiceInput(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if(!SpeechRecognition){
     showToast("Voice input is not supported in this browser. Try Chrome or Edge.");
@@ -441,8 +408,11 @@ function toggleVoiceInput(){
     let finalText="", interimText="";
 
     for(let i=event.resultIndex;i<event.results.length;i++){
-      if(event.results[i].isFinal)finalText+=event.results[i][0].transcript;
-      else interimText+=event.results[i][0].transcript;
+      if(event.results[i].isFinal){
+        finalText+=event.results[i][0].transcript;
+      }else{
+        interimText+=event.results[i][0].transcript;
+      }
     }
 
     if(finalText){
@@ -450,13 +420,17 @@ function toggleVoiceInput(){
       resizeInput();
     }
 
-    mic.title=interimText?"Hearing: "+interimText:"Voice input";
+    mic.title=interimText
+      ? "Hearing: "+interimText
+      : "Voice input";
   };
 
   recognition.onerror=(event)=>{
-    showToast(event.error==="not-allowed"
-      ? "Please allow microphone access in your browser."
-      : "Voice input stopped: "+event.error);
+    showToast(
+      event.error==="not-allowed"
+        ? "Please allow microphone access in your browser."
+        : "Voice input stopped: "+event.error
+    );
   };
 
   recognition.onend=()=>{
@@ -482,7 +456,10 @@ function readAloud(text, button){
     return;
   }
 
-  if(window.speechSynthesis.speaking && currentlySpeakingButton===button){
+  if(
+    window.speechSynthesis.speaking &&
+    currentlySpeakingButton===button
+  ){
     window.speechSynthesis.cancel();
     button.classList.remove("speaking");
     currentlySpeakingButton=null;
@@ -496,6 +473,7 @@ function readAloud(text, button){
   }
 
   const utterance=new SpeechSynthesisUtterance(text);
+
   utterance.rate=1;
   utterance.pitch=1;
 
@@ -511,6 +489,7 @@ function readAloud(text, button){
 
   button.classList.add("speaking");
   currentlySpeakingButton=button;
+
   window.speechSynthesis.speak(utterance);
 }
 
@@ -521,8 +500,8 @@ fileInput.addEventListener("change",()=>{
   const incoming=Array.from(fileInput.files||[]);
 
   for(const file of incoming){
-    if(!selectedFiles.some(existing =>
-      existing.name===file.name && existing.size===file.size
+    if(!selectedFiles.some(
+      existing=>existing.name===file.name&&existing.size===file.size
     )){
       selectedFiles.push(file);
     }
@@ -562,35 +541,53 @@ async function extractDocumentText(file){
   const ext=file.name.split(".").pop().toLowerCase();
 
   if(file.size>15*1024*1024){
-    throw new Error(file.name+" is larger than 15 MB. Please use a smaller file.");
+    throw new Error(
+      file.name+" is larger than 15 MB. Please use a smaller file."
+    );
   }
 
-  if(ext==="txt")return await file.text();
+  if(ext==="txt"){
+    return await file.text();
+  }
 
   if(ext==="docx"){
     if(!window.mammoth){
-      throw new Error("DOCX reader could not load. Check your internet connection.");
+      throw new Error(
+        "DOCX reader could not load. Check your internet connection."
+      );
     }
 
     const arrayBuffer=await file.arrayBuffer();
-    const result=await mammoth.extractRawText({arrayBuffer});
+
+    const result=await mammoth.extractRawText({
+      arrayBuffer
+    });
+
     return result.value;
   }
 
   if(ext==="pdf"){
     if(!window.pdfjsLib){
-      throw new Error("PDF reader could not load. Check your internet connection.");
+      throw new Error(
+        "PDF reader could not load. Check your internet connection."
+      );
     }
 
     const data=new Uint8Array(await file.arrayBuffer());
+
     const pdf=await pdfjsLib.getDocument({data}).promise;
+
     let pages=[];
+
     const maxPages=Math.min(pdf.numPages,100);
 
     for(let pageNo=1;pageNo<=maxPages;pageNo++){
       const page=await pdf.getPage(pageNo);
       const content=await page.getTextContent();
-      pages.push(content.items.map(item=>item.str).join(" "));
+
+      pages.push(
+        content.items.map(item=>item.str).join(" ")
+      );
     }
 
     if(pdf.numPages>maxPages){
@@ -600,19 +597,44 @@ async function extractDocumentText(file){
     return pages.join("\n\n");
   }
 
-  throw new Error("Unsupported file type: "+file.name+". Upload PDF, DOCX or TXT.");
+  throw new Error(
+    "Unsupported file type: "+file.name+". Upload PDF, DOCX or TXT."
+  );
 }
 
-// Gemini model categories
+// Model selection and health status
+let availableGeminiModels = [];
+let selectedGeminiModel = "";
+let modelHealth = {};
+let healthCheckedAt = 0;
+
 function modelCategory(modelName){
   const name=(modelName||"").toLowerCase();
 
   if(name.includes("deep-research")) return "RESEARCH";
-  if(name.includes("antigravity") || name.includes("preview") || name.includes("omni")) return "PREVIEW";
+
+  if(
+    name.includes("antigravity") ||
+    name.includes("preview") ||
+    name.includes("omni")
+  ) return "PREVIEW";
+
   if(name.includes("gemma")) return "GEMMA";
-  if(name.includes("image") || name.includes("nano-banana")) return "IMAGE";
-  if(name.includes("pro") || name.includes("argon") || name.includes("carbon") || name.includes("hydrogen")) return "PRO";
+
+  if(
+    name.includes("image") ||
+    name.includes("nano-banana")
+  ) return "IMAGE";
+
+  if(
+    name.includes("pro") ||
+    name.includes("argon") ||
+    name.includes("carbon") ||
+    name.includes("hydrogen")
+  ) return "PRO";
+
   if(name.includes("lite")) return "LITE";
+
   if(name.includes("flash")) return "FLASH";
 
   return "GEMINI";
@@ -620,15 +642,104 @@ function modelCategory(modelName){
 
 function setModelStatus(state, message){
   const badge=document.getElementById("modelStatus");
+
   if(!badge)return;
 
   badge.className="model-status "+state;
   badge.textContent=message;
-  modelIsUnavailable=state==="unavailable";
+}
+
+function selectedModelLabel(){
+  const model=availableGeminiModels.find(
+    item=>item.name===selectedGeminiModel
+  );
+
+  return model
+    ? (model.display_name||model.name)
+    : selectedGeminiModel;
+}
+
+function statusLabel(status){
+  if(!status)return "CHECKING";
+
+  if(status.status==="fast"){
+    return `FAST · ${status.seconds}s`;
+  }
+
+  if(status.status==="busy"){
+    return `BUSY · ${status.seconds}s`;
+  }
+
+  return "NOT AVAILABLE";
+}
+
+function updateModelOptions(){
+  const select=document.getElementById("modelSelect");
+  const current=selectedGeminiModel || select.value;
+
+  select.innerHTML="";
+
+  const groups=[
+    "GEMINI",
+    "FLASH",
+    "LITE",
+    "PRO",
+    "IMAGE",
+    "GEMMA",
+    "RESEARCH",
+    "PREVIEW"
+  ];
+
+  const sorted=[...availableGeminiModels].sort((a,b)=>{
+    const ca=modelCategory(a.name);
+    const cb=modelCategory(b.name);
+
+    return groups.indexOf(ca)-groups.indexOf(cb)
+      || a.name.localeCompare(b.name);
+  });
+
+  sorted.forEach(model=>{
+    const option=document.createElement("option");
+
+    option.value=model.name;
+
+    const result=modelHealth[model.name];
+    const label=model.display_name||model.name;
+
+    option.textContent=
+      label+" · "+modelCategory(model.name)+" · "+statusLabel(result);
+
+    select.appendChild(option);
+  });
+
+  if(current && sorted.some(m=>m.name===current)){
+    select.value=current;
+    selectedGeminiModel=current;
+  }
+
+  updateSelectedModelStatus();
+}
+
+function updateSelectedModelStatus(){
+  const result=modelHealth[selectedGeminiModel];
+
+  if(!result){
+    setModelStatus("checking","CHECKING MODEL");
+    return;
+  }
+
+  if(result.status==="fast"){
+    setModelStatus("available",`FAST · ${result.seconds}s`);
+  }else if(result.status==="busy"){
+    setModelStatus("checking",`BUSY · ${result.seconds}s`);
+  }else{
+    setModelStatus("unavailable","NOT AVAILABLE");
+  }
 }
 
 async function readJsonResponse(response){
   const raw=await response.text();
+
   let data;
 
   try{
@@ -638,22 +749,28 @@ async function readJsonResponse(response){
   }
 
   if(!response.ok){
-    const error=new Error(data.error||"UNAVAILABLE NOW TRY LATER");
+    const error=new Error(
+      data.error||"UNAVAILABLE NOW TRY LATER"
+    );
+
     error.status=response.status;
-    error.unavailable=data.unavailable===true ||
+
+    error.unavailable=
+      data.unavailable===true ||
       [429,502,503,504].includes(response.status);
+
     throw error;
   }
 
   return data;
 }
 
-// Fetch the actual models available to this API key.
 async function loadGeminiModels(){
   const select=document.getElementById("modelSelect");
+
   select.innerHTML='<option value="">Loading models...</option>';
 
-  setModelStatus("checking","CHECKING MODELS");
+  setModelStatus("checking","LOADING MODELS");
 
   try{
     const response=await fetch("/models",{
@@ -662,86 +779,152 @@ async function loadGeminiModels(){
     });
 
     const data=await readJsonResponse(response);
-    availableGeminiModels=Array.isArray(data.models)?data.models:[];
 
-    select.innerHTML="";
+    availableGeminiModels=
+      Array.isArray(data.models)?data.models:[];
 
     if(!availableGeminiModels.length){
-      select.innerHTML='<option value="">No models available</option>';
-      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
-      showToast("No models supporting generateContent were found for this API key.");
+      select.innerHTML=
+        '<option value="">No models available</option>';
+
+      setModelStatus("unavailable","NO MODELS");
       return;
     }
 
-    const groups=["GEMINI","FLASH","LITE","PRO","IMAGE","GEMMA","RESEARCH","PREVIEW"];
+    const preferred=
+      availableGeminiModels.find(
+        m=>m.name==="gemini-3.5-flash-lite"
+      )
+      ||
+      availableGeminiModels.find(
+        m=>m.name==="gemini-2.5-flash"
+      )
+      ||
+      availableGeminiModels[0];
 
-    const sorted=[...availableGeminiModels].sort((a,b)=>{
-      const ca=modelCategory(a.name);
-      const cb=modelCategory(b.name);
-      return groups.indexOf(ca)-groups.indexOf(cb) || a.name.localeCompare(b.name);
-    });
-
-    sorted.forEach(model=>{
-      const option=document.createElement("option");
-      option.value=model.name;
-
-      const label=model.display_name||model.name;
-      option.textContent=label+" · "+modelCategory(model.name);
-
-      select.appendChild(option);
-    });
-
-    const preferred=availableGeminiModels.find(m=>m.name==="gemini-3.5-flash-lite")
-      ||availableGeminiModels.find(m=>m.name==="gemini-2.5-flash")
-      ||availableGeminiModels[0];
-
-    select.value=preferred.name;
     selectedGeminiModel=preferred.name;
 
-    setModelStatus("available","API LISTED · CHECKED ON SEND");
+    updateModelOptions();
+
+    await checkAllModels(false);
 
   }catch(error){
-    select.innerHTML='<option value="">Models unavailable</option>';
-    setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
-    showToast("UNAVAILABLE NOW TRY LATER");
+    select.innerHTML=
+      '<option value="">Models unavailable</option>';
+
+    setModelStatus("unavailable","NOT AVAILABLE");
+
+    showToast(
+      "Could not load models. Please try again later."
+    );
   }
 }
 
-document.getElementById("modelSelect").addEventListener("change",event=>{
-  selectedGeminiModel=event.target.value;
+async function checkAllModels(forceRefresh=false){
+  if(!availableGeminiModels.length)return false;
 
-  const chosen=availableGeminiModels.find(model=>model.name===selectedGeminiModel);
+  const refreshButton=
+    document.getElementById("refreshModelStatus");
 
-  if(chosen){
-    setModelStatus("available","API LISTED · CHECKED ON SEND");
-    showToast((chosen.display_name||chosen.name)+" selected · "+modelCategory(chosen.name));
-  }else{
-    setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+  if(refreshButton){
+    refreshButton.disabled=true;
+    refreshButton.textContent="…";
   }
-});
 
+  setModelStatus("checking","TESTING ALL MODELS");
+
+  try{
+    const url=forceRefresh
+      ? "/model-health?refresh=1"
+      : "/model-health";
+
+    const response=await fetch(url,{
+      headers:{"Accept":"application/json"},
+      cache:"no-store"
+    });
+
+    const data=await readJsonResponse(response);
+
+    modelHealth=data.results||{};
+    healthCheckedAt=Date.now();
+
+    updateModelOptions();
+
+    const fast=Object.values(modelHealth).filter(
+      x=>x.status==="fast"
+    ).length;
+
+    const busyCount=Object.values(modelHealth).filter(
+      x=>x.status==="busy"
+    ).length;
+
+    const unavailable=Object.values(modelHealth).filter(
+      x=>x.status==="unavailable"
+    ).length;
+
+    showToast(
+      `Model check complete · ${fast} fast · ${busyCount} busy · ${unavailable} not available`
+    );
+
+    return true;
+
+  }catch(error){
+    setModelStatus("unavailable","CHECK FAILED");
+
+    showToast(
+      "Model status check failed. Please try again later."
+    );
+
+    return false;
+
+  }finally{
+    if(refreshButton){
+      refreshButton.disabled=false;
+      refreshButton.textContent="↻";
+    }
+  }
+}
+
+document.getElementById("modelSelect").addEventListener(
+  "change",
+  event=>{
+    selectedGeminiModel=event.target.value;
+    updateSelectedModelStatus();
+  }
+);
+
+// Sidebar and temporary chat
 function showTemporaryInfo(){
-  showToast("Temporary chat: messages are not saved and disappear when you refresh or start a new chat.");
+  showToast(
+    "Temporary chat: messages are not saved and disappear when you refresh or start a new chat."
+  );
 }
+
 function openSidebar(){
   document.getElementById("sidebar").classList.add("open");
   document.getElementById("overlay").classList.add("show");
 }
+
 function closeSidebar(){
   document.getElementById("sidebar").classList.remove("open");
   document.getElementById("overlay").classList.remove("show");
 }
+
 function useSuggestion(text){
   input.value=text;
   resizeInput();
   input.focus();
 }
 
+// Add messages to the chat
 function addMessage(text, role, loading=false){
   const row=document.createElement("div");
-  row.className="message-row "+(role==="user"?"user-row":"bot-row");
+
+  row.className=
+    "message-row "+(role==="user"?"user-row":"bot-row");
 
   const avatar=document.createElement("div");
+
   avatar.className="avatar";
 
   if(role==="user"){
@@ -761,15 +944,19 @@ function addMessage(text, role, loading=false){
   bubble.className="bubble";
 
   if(loading){
-    bubble.innerHTML='<span class="typing" aria-label="ROSE AI is thinking"><i></i><i></i><i></i></span>';
+    bubble.innerHTML=
+      '<span class="typing" aria-label="ROSE AI is thinking"><i></i><i></i><i></i></span>';
   }else{
     bubble.textContent=text;
   }
 
   body.append(name,bubble);
 
-  if(role==="user")row.append(body,avatar);
-  else row.append(avatar,body);
+  if(role==="user"){
+    row.append(body,avatar);
+  }else{
+    row.append(avatar,body);
+  }
 
   chatContent.appendChild(row);
   scrollToBottom();
@@ -788,8 +975,14 @@ function addCopyButton(messageBody, text){
   copy.onclick=async()=>{
     try{
       await navigator.clipboard.writeText(text);
+
       copy.textContent="Copied";
-      setTimeout(()=>copy.textContent="Copy",1200);
+
+      setTimeout(
+        ()=>copy.textContent="Copy",
+        1200
+      );
+
     }catch{
       showToast("Copy is not available in this browser.");
     }
@@ -798,6 +991,7 @@ function addCopyButton(messageBody, text){
   const speak=document.createElement("button");
   speak.className="mini-action read-btn";
   speak.textContent="🔊 Read aloud";
+
   speak.onclick=()=>readAloud(text,speak);
 
   actions.append(copy,speak);
@@ -805,88 +999,124 @@ function addCopyButton(messageBody, text){
 }
 
 function sleep(ms){
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve=>setTimeout(resolve,ms));
 }
 
+// Safely display normal text and bold phrases
 function appendFormattedToken(container, token){
-  const match = token.match(/^\*\*([\s\S]+)\*\*$/);
+  const match=token.match(/^\*\*([\s\S]+)\*\*$/);
 
   if(match){
-    const strong = document.createElement("strong");
-    strong.textContent = match[1];
+    const strong=document.createElement("strong");
+    strong.textContent=match[1];
     container.appendChild(strong);
   }else{
     container.appendChild(document.createTextNode(token));
   }
 }
 
+// Reveal the reply gradually
 async function revealReply(bubble, text){
-  bubble.textContent = "";
+  bubble.textContent="";
 
-  const cursor = document.createElement("span");
-  cursor.className = "typing-cursor";
+  const cursor=document.createElement("span");
+  cursor.className="typing-cursor";
+
   bubble.appendChild(cursor);
 
-  const tokens = text.match(/\*\*[\s\S]+?\*\*|\s+|[^\s]+/g) || [text];
+  const tokens=
+    text.match(/\*\*[\s\S]+?\*\*|\s+|[^\s]+/g)||[text];
 
   for(const token of tokens){
-    const part = document.createElement("span");
-    appendFormattedToken(part, token);
-    bubble.insertBefore(part, cursor);
+    const part=document.createElement("span");
+
+    appendFormattedToken(part,token);
+
+    bubble.insertBefore(part,cursor);
+
     scrollToBottom();
-    await sleep(token.trim() ? 22 : 5);
+
+    await sleep(token.trim()?22:5);
   }
 
   cursor.remove();
-  await typesetReply(bubble, text);
+
+  await typesetReply(bubble,text);
 }
 
 function escapeHtml(value){
-  return value.replace(/[&<>"']/g, ch => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  return value.replace(/[&<>"']/g,ch=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   })[ch]);
 }
 
 function formatReplyHtml(text){
-  let safe = escapeHtml(text);
-  safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, "<strong>$1</strong>");
+  let safe=escapeHtml(text);
+
+  safe=safe.replace(
+    /\*\*([\s\S]+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
   return safe;
 }
 
-async function typesetReply(bubble, text){
-  bubble.innerHTML = formatReplyHtml(text);
+async function typesetReply(bubble,text){
+  bubble.innerHTML=formatReplyHtml(text);
 
-  try {
-    if (!window.MathJax || !window.MathJax.typesetPromise) {
-      const mathScript = document.getElementById("mathjax-script");
-      if (mathScript) {
-        await new Promise(resolve => {
-          mathScript.addEventListener("load", resolve, { once:true });
-          mathScript.addEventListener("error", resolve, { once:true });
+  try{
+    if(!window.MathJax||!window.MathJax.typesetPromise){
+      const mathScript=
+        document.getElementById("mathjax-script");
+
+      if(mathScript){
+        await new Promise(resolve=>{
+          mathScript.addEventListener(
+            "load",
+            resolve,
+            {once:true}
+          );
+
+          mathScript.addEventListener(
+            "error",
+            resolve,
+            {once:true}
+          );
         });
       }
     }
 
-    if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+    if(
+      window.MathJax &&
+      window.MathJax.startup &&
+      window.MathJax.startup.promise
+    ){
       await window.MathJax.startup.promise;
     }
 
-    if (window.MathJax && window.MathJax.typesetPromise) {
+    if(window.MathJax&&window.MathJax.typesetPromise){
       await window.MathJax.typesetPromise([bubble]);
     }
-  } catch(error) {
-    console.error("Math rendering error:", error);
+
+  }catch(error){
+    console.error("Math rendering error:",error);
   }
 
   scrollToBottom();
 }
 
+// Send message
 async function sendMessage(){
   const question=input.value.trim();
 
   if((!question&&selectedFiles.length===0)||busy)return;
 
   const welcome=document.getElementById("welcome");
+
   if(welcome)welcome.remove();
 
   busy=true;
@@ -896,20 +1126,30 @@ async function sendMessage(){
   if(recognition){
     recognition.stop();
     recognition=null;
-    document.getElementById("micBtn").classList.remove("active");
+
+    document.getElementById("micBtn")
+      .classList.remove("active");
   }
 
   const filesToSend=[...selectedFiles];
+
   selectedFiles=[];
   renderAttachments();
 
   input.value="";
   resizeInput();
 
-  const visibleQuestion=question||(filesToSend.length?"Please analyse the attached document(s).":"");
+  const visibleQuestion=
+    question||
+    (filesToSend.length
+      ?"Please analyse the attached document(s)."
+      :"");
 
   addMessage(
-    visibleQuestion+(filesToSend.length?"\n\n📎 "+filesToSend.map(f=>f.name).join(", "):""),
+    visibleQuestion+
+    (filesToSend.length
+      ?"\n\n📎 "+filesToSend.map(f=>f.name).join(", ")
+      :""),
     "user"
   );
 
@@ -925,43 +1165,71 @@ async function sendMessage(){
         const extracted=await extractDocumentText(file);
 
         if(!extracted.trim()){
-          throw new Error(file.name+" contains no extractable text. Scanned PDFs may need OCR first.");
+          throw new Error(
+            file.name+
+            " contains no extractable text. Scanned PDFs may need OCR first."
+          );
         }
 
-        documentContext+="\n\n--- DOCUMENT: "+file.name+" ---\n"+extracted.slice(0,60000);
+        documentContext+=
+          "\n\n--- DOCUMENT: "+
+          file.name+
+          " ---\n"+
+          extracted.slice(0,60000);
       }
     }
 
-    const currentUserContent=visibleQuestion+
-      (documentContext?"\n\nAttached document content:"+documentContext:"");
+    const currentUserContent=
+      visibleQuestion+
+      (documentContext
+        ?"\n\nAttached document content:"+documentContext
+        :"");
 
-    const requestText=[...history,{role:"user",content:currentUserContent}]
-      .map(item=>(item.role==="user"?"User":"ROSE AI")+":\n"+item.content)
-      .join("\n\n");
+    const requestText=[
+      ...history,
+      {role:"user",content:currentUserContent}
+    ]
+    .map(item=>
+      (item.role==="user"?"User":"ROSE AI")+
+      ":\n"+
+      item.content
+    )
+    .join("\n\n");
 
     if(!selectedGeminiModel){
       throw new Error("UNAVAILABLE NOW TRY LATER");
     }
 
-    // Refresh the available-model list before sending.
-    setModelStatus("checking","CHECKING MODEL");
+    // Use the shared health check before sending
+    if(
+      !modelHealth[selectedGeminiModel] ||
+      Date.now()-healthCheckedAt>60000
+    ){
+      const checked=await checkAllModels(false);
 
-    const modelCheckResponse=await fetch("/models?refresh=1",{
-      headers:{"Accept":"application/json"},
-      cache:"no-store"
-    });
-
-    const modelCheck=await readJsonResponse(modelCheckResponse);
-
-    const currentlyListed=Array.isArray(modelCheck.models) &&
-      modelCheck.models.some(model=>model.name===selectedGeminiModel);
-
-    if(!currentlyListed){
-      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
-      throw new Error("UNAVAILABLE NOW TRY LATER");
+      if(!checked){
+        throw new Error(
+          "Model status check failed. Please try again."
+        );
+      }
     }
 
-    setModelStatus("checking","MODEL BUSY? CHECKING");
+    const selectedHealth=modelHealth[selectedGeminiModel];
+
+    if(
+      !selectedHealth ||
+      selectedHealth.status==="unavailable"
+    ){
+      setModelStatus("unavailable","NOT AVAILABLE");
+
+      throw new Error(
+        "NOT AVAILABLE · This model did not respond to the availability test."
+      );
+    }
+
+    updateSelectedModelStatus();
+
+    const chatStarted=performance.now();
 
     const response=await fetch("/chat",{
       method:"POST",
@@ -976,9 +1244,24 @@ async function sendMessage(){
     });
 
     const data=await readJsonResponse(response);
-    const reply=data.reply||"I couldn't generate a response. Please try again.";
 
-    setModelStatus("available","AVAILABLE");
+    const reply=
+      data.reply||
+      "I couldn't generate a response. Please try again.";
+
+    const elapsed=
+      (performance.now()-chatStarted)/1000;
+
+    const actualStatus=
+      elapsed<=2.5?"fast":"busy";
+
+    modelHealth[selectedGeminiModel]={
+      status:actualStatus,
+      seconds:elapsed.toFixed(1)
+    };
+
+    updateModelOptions();
+    updateSelectedModelStatus();
 
     await revealReply(loading.bubble,reply);
 
@@ -987,25 +1270,46 @@ async function sendMessage(){
       {role:"assistant",content:reply}
     );
 
-    addCopyButton(loading.row.querySelector(".message-body"),reply);
+    addCopyButton(
+      loading.row.querySelector(".message-body"),
+      reply
+    );
 
   }catch(error){
-    const isUnavailable=error.unavailable ||
+    const isUnavailable=
+      error.unavailable ||
       error.message==="UNAVAILABLE NOW TRY LATER" ||
       /busy|overload|quota|rate.?limit|resource_exhausted|unavailable|temporar|timeout/i.test(error.message||"");
 
     if(isUnavailable){
-      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+      modelHealth[selectedGeminiModel]={
+        status:"unavailable",
+        seconds:null
+      };
+
+      updateModelOptions();
+
+      setModelStatus(
+        "unavailable",
+        "NOT AVAILABLE"
+      );
 
       loading.bubble.textContent=
-        "UNAVAILABLE NOW TRY LATER. This model may be busy or temporarily unavailable. Please try again in a little while or select another model.";
+        "NOT AVAILABLE · This model did not respond successfully. Please try again later or select another model.";
 
-      showToast("UNAVAILABLE NOW TRY LATER");
+      showToast(
+        "NOT AVAILABLE · Try another model or check again later."
+      );
 
     }else{
-      setModelStatus("available","AVAILABLE · REQUEST FAILED");
+      setModelStatus(
+        "available",
+        "AVAILABLE · REQUEST FAILED"
+      );
 
-      loading.bubble.textContent="Sorry, something went wrong: "+error.message;
+      loading.bubble.textContent=
+        "Sorry, something went wrong: "+error.message;
+
       showToast(error.message);
     }
 
@@ -1017,9 +1321,12 @@ async function sendMessage(){
   }
 }
 
+// New temporary chat
 function newChat(){
   if(busy){
-    showToast("Please wait for the current response to finish.");
+    showToast(
+      "Please wait for the current response to finish."
+    );
     return;
   }
 
@@ -1027,16 +1334,7 @@ function newChat(){
 
   chatContent.innerHTML=`
     <div class="welcome" id="welcome">
-      <div class="welcome-mark">
-        <svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-          <path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/>
-          <path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/>
-          <path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/>
-          <path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="welcome-mark"><svg class="rose-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M31 34c-2 9-2 17 0 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M30 47c-9-8-17-6-20-3 7 9 14 10 20 8M32 51c7-9 15-10 21-7-5 9-12 12-21 10" fill="#65a765" stroke="#4b8d55" stroke-width="1.5" stroke-linejoin="round"/><path d="M32 34c-7 0-12-5-12-11 0-5 4-9 9-9 0-6 5-9 10-7 5 2 6 7 4 11 6 1 9 7 6 12-3 5-10 7-17 4Z" fill="#e53e3e"/><path d="M31 29c-5-2-7-7-4-11 2-3 6-3 8 0 3-4 8-2 8 2 4 2 3 8-2 10-3 2-7 1-10-1Z" fill="#ff8b9b"/><path d="M31 26c0-3 3-5 6-4 2 1 3 3 2 5-2 3-6 3-8-1Z" fill="#c92d4b"/><path d="M23 18c-3-3-2-7 1-9 3-2 7-1 8 2M43 15c4-1 7 1 7 5" fill="none" stroke="#ffb0ba" stroke-width="2" stroke-linecap="round"/></svg></div>
       <h1>What can I help you <span>with?</span></h1>
       <p>Ask a question, explore an idea, or get something done.</p>
       <div class="suggestions">
@@ -1050,12 +1348,15 @@ function newChat(){
   input.value="";
   resizeInput();
   closeSidebar();
+
   showToast("New temporary chat started.");
 }
 
 function resizeInput(){
   input.style.height="auto";
-  input.style.height=Math.min(input.scrollHeight,180)+"px";
+
+  input.style.height=
+    Math.min(input.scrollHeight,180)+"px";
 }
 
 input.addEventListener("input",resizeInput);
@@ -1068,18 +1369,28 @@ input.addEventListener("keydown",event=>{
 });
 
 document.addEventListener("keydown",event=>{
-  if(event.key==="Escape")closeSettings();
+  if(event.key==="Escape"){
+    closeSettings();
+  }
 });
 
-window.matchMedia("(prefers-color-scheme: light)").addEventListener?.("change",()=>{
-  if(localStorage.getItem("rose_theme_pref")==="time-based")setTheme("time-based");
+window.matchMedia(
+  "(prefers-color-scheme: light)"
+).addEventListener?.("change",()=>{
+  if(
+    localStorage.getItem("rose_theme_pref")==="time-based"
+  ){
+    setTheme("time-based");
+  }
 });
 
 setInterval(()=>{
-  if(localStorage.getItem("rose_theme_pref")==="time-based")setTheme("time-based");
+  if(
+    localStorage.getItem("rose_theme_pref")==="time-based"
+  ){
+    setTheme("time-based");
+  }
 },60000);
-
-loadGeminiModels();
 </script>
 </body>
 </html>
