@@ -7,8 +7,25 @@
 <meta name="theme-color" content="#212121">
 <title>Brownie AI</title>
 
+<!-- MathJax: renders LaTeX mathematics -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    processEscapes: true
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  startup: { typeset: false }
+};
+</script>
+<script id="mathjax-script" defer
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
 <style>
-:root {
+:root{
   --bg:#212121;
   --sidebar:#171717;
   --text:#ececec;
@@ -16,13 +33,9 @@
   --user:#303030;
 }
 
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
-body {
+body{
   height:100vh;
   overflow:hidden;
   background:var(--bg);
@@ -30,93 +43,99 @@ body {
   font-family:Arial,sans-serif;
 }
 
-button,input { font:inherit; }
-button { cursor:pointer; }
+button,input{font:inherit}
+button{cursor:pointer}
 
-.app {
-  height:100vh;
-  display:flex;
-}
+.app{height:100vh;display:flex}
 
-.sidebar {
+.sidebar{
   width:265px;
-  flex-shrink:0;
+  flex:0 0 265px;
   background:var(--sidebar);
   padding:17px 13px;
   display:flex;
   flex-direction:column;
   gap:18px;
   border-right:1px solid #242424;
+  transition:transform .2s ease;
 }
 
-.brand-row {
+.brand-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  padding:3px 5px 8px;
 }
 
-.brand {
+.brand{
   display:flex;
   align-items:center;
   gap:10px;
-  font-weight:bold;
+  font-weight:700;
   font-size:19px;
 }
 
-.brand-mark {
+.brand-mark{
   width:31px;
   height:31px;
   border-radius:11px;
   background:linear-gradient(145deg,#e9c08e,#a9794b);
   display:grid;
   place-items:center;
-  color:#21170f;
-  font-weight:bold;
+  color:#20170f;
+  font-weight:900;
 }
 
-.icon-btn {
+.icon-btn{
   width:36px;
   height:36px;
   border:0;
   border-radius:10px;
   background:transparent;
-  color:#bbb;
+  color:#b8b8b8;
+  display:grid;
+  place-items:center;
   font-size:19px;
 }
 
-.icon-btn:hover,
-.side-btn:hover {
+.icon-btn:hover,.side-btn:hover{
   background:#292929;
+  color:white;
 }
 
-.side-btn {
+.side-btn{
   width:100%;
+  display:flex;
+  align-items:center;
+  gap:11px;
   padding:11px 12px;
   border:1px solid #353535;
   border-radius:11px;
   background:transparent;
-  color:#eee;
+  color:#e6e6e6;
   text-align:left;
   font-size:14px;
 }
 
-.side-label {
+.side-btn.primary{background:#242424}
+
+.side-label{
   color:#858585;
   font-size:11px;
   text-transform:uppercase;
-  letter-spacing:1px;
-  padding:10px;
+  letter-spacing:1.1px;
+  padding:10px 10px 0;
 }
 
-.side-note {
+.side-note{
   margin-top:auto;
   padding:12px 10px;
   color:#858585;
   font-size:12px;
-  line-height:1.6;
+  line-height:1.55;
 }
 
-.main {
+.main{
   min-width:0;
   flex:1;
   display:flex;
@@ -124,9 +143,9 @@ button { cursor:pointer; }
   position:relative;
 }
 
-.topbar {
+.topbar{
   height:62px;
-  flex-shrink:0;
+  flex:0 0 62px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -134,12 +153,20 @@ button { cursor:pointer; }
   border-bottom:1px solid #303030;
 }
 
-.top-title {
-  font-size:15px;
-  font-weight:bold;
+.top-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
-.temp-pill {
+.mobile-menu{display:none}
+
+.top-title{
+  font-size:15px;
+  font-weight:600;
+}
+
+.temp-pill{
   display:flex;
   align-items:center;
   gap:7px;
@@ -151,21 +178,21 @@ button { cursor:pointer; }
   background:#302a24;
 }
 
-.temp-dot {
+.temp-dot{
   width:7px;
   height:7px;
   border-radius:50%;
   background:#d6a66f;
 }
 
-.chat-scroll {
+.chat-scroll{
   flex:1;
   overflow-y:auto;
-  padding:30px 20px;
+  padding:30px 20px 24px;
   scroll-behavior:smooth;
 }
 
-.chat-content {
+.chat-content{
   max-width:790px;
   margin:0 auto;
   min-height:100%;
@@ -173,13 +200,13 @@ button { cursor:pointer; }
   flex-direction:column;
 }
 
-.welcome {
+.welcome{
   margin:auto;
   text-align:center;
   padding:35px 10px 70px;
 }
 
-.welcome-mark {
+.welcome-mark{
   width:58px;
   height:58px;
   margin:0 auto 22px;
@@ -189,32 +216,31 @@ button { cursor:pointer; }
   background:linear-gradient(145deg,#e9c08e,#a9794b);
   color:#21170f;
   font-size:28px;
-  font-weight:bold;
+  font-weight:900;
 }
 
-.welcome h1 {
-  font-size:34px;
+.welcome h1{
+  font-size:clamp(27px,4vw,36px);
+  font-weight:650;
   margin-bottom:12px;
 }
 
-.welcome h1 span {
-  color:#d6a66f;
-}
+.welcome h1 span{color:#d6a66f}
 
-.welcome p {
+.welcome p{
   color:#a3a3a3;
   font-size:14px;
 }
 
-.suggestions {
+.suggestions{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
   max-width:620px;
   margin:28px auto 0;
 }
 
-.suggestion {
+.suggestion{
   border:1px solid #3c3c3c;
   border-radius:13px;
   background:#262626;
@@ -222,77 +248,84 @@ button { cursor:pointer; }
   padding:14px;
   text-align:left;
   font-size:13px;
-  line-height:1.5;
+  line-height:1.45;
 }
 
-.suggestion:hover {
+.suggestion:hover{
   background:#303030;
+  border-color:#5b5147;
 }
 
-.suggestion strong {
+.suggestion strong{
   display:block;
   color:#eee;
   margin-bottom:4px;
 }
 
-.message-row {
+.message-row{
   display:flex;
   gap:13px;
-  margin-bottom:25px;
+  margin:0 0 25px;
   align-items:flex-start;
 }
 
-.message-row.user-row {
-  justify-content:flex-end;
-}
+.message-row.user-row{justify-content:flex-end}
 
-.avatar {
+.avatar{
   width:29px;
   height:29px;
-  flex-shrink:0;
+  flex:0 0 29px;
   border-radius:10px;
   display:grid;
   place-items:center;
   background:#3a3027;
   color:#e3bb8c;
-  font-weight:bold;
+  font-weight:800;
   margin-top:2px;
 }
 
-.user-row .avatar {
+.user-row .avatar{
   background:#3c3c3c;
   color:#eee;
   order:2;
 }
 
-.message-body {
-  max-width:78%;
+.message-body{
+  max-width:min(78%,680px);
   min-width:0;
 }
 
-.message-name {
+.message-name{
   font-size:12px;
   color:#a5a5a5;
-  margin-bottom:6px;
+  margin:0 0 6px 2px;
 }
 
-.user-row .message-name {
-  text-align:right;
-}
+.user-row .message-name{text-align:right}
 
-.bubble {
+.bubble{
   font-size:15px;
-  line-height:1.7;
+  line-height:1.72;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
 }
 
-.bubble strong {
+.bubble strong{
   font-weight:750;
   color:#fff;
 }
 
-.typing-cursor {
+/* Mathematical formatting */
+.bubble mjx-container[display="true"]{
+  margin:1em 0!important;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.bubble mjx-container{color:inherit}
+
+/* Animated typing cursor */
+.typing-cursor{
   display:inline-block;
   width:2px;
   height:1em;
@@ -302,28 +335,26 @@ button { cursor:pointer; }
   animation:cursorBlink .8s steps(2,start) infinite;
 }
 
-@keyframes cursorBlink {
-  to { visibility:hidden; }
+@keyframes cursorBlink{
+  to{visibility:hidden}
 }
 
-.user-row .bubble {
+.user-row .bubble{
   background:var(--user);
   padding:11px 15px;
   border-radius:19px;
   line-height:1.6;
 }
 
-.bot-row .bubble {
-  padding:1px 2px;
-}
+.bot-row .bubble{padding:1px 2px}
 
-.message-actions {
+.message-actions{
   display:flex;
   gap:5px;
   margin-top:8px;
 }
 
-.mini-action {
+.mini-action{
   border:0;
   background:transparent;
   color:#858585;
@@ -332,19 +363,20 @@ button { cursor:pointer; }
   font-size:12px;
 }
 
-.mini-action:hover {
+.mini-action:hover{
   background:#353535;
-  color:white;
+  color:#eee;
 }
 
-.typing {
+/* Thinking animation */
+.typing{
   display:flex;
   align-items:center;
   gap:5px;
   height:24px;
 }
 
-.typing i {
+.typing i{
   width:6px;
   height:6px;
   border-radius:50%;
@@ -352,30 +384,28 @@ button { cursor:pointer; }
   animation:pulse 1s infinite ease-in-out;
 }
 
-.typing i:nth-child(2) { animation-delay:.15s; }
-.typing i:nth-child(3) { animation-delay:.3s; }
+.typing i:nth-child(2){animation-delay:.15s}
+.typing i:nth-child(3){animation-delay:.3s}
 
-@keyframes pulse {
-  0%,80%,100% {
+@keyframes pulse{
+  0%,80%,100%{
     opacity:.35;
     transform:translateY(0);
   }
-  40% {
+  40%{
     opacity:1;
     transform:translateY(-4px);
   }
 }
 
-.composer-wrap {
-  padding:10px 20px 19px;
-}
+.composer-wrap{padding:10px 20px 19px}
 
-.composer-area {
+.composer-area{
   max-width:790px;
-  margin:auto;
+  margin:0 auto;
 }
 
-.composer {
+.composer{
   display:flex;
   align-items:flex-end;
   gap:10px;
@@ -386,11 +416,9 @@ button { cursor:pointer; }
   box-shadow:0 8px 28px #0002;
 }
 
-.composer:focus-within {
-  border-color:#696057;
-}
+.composer:focus-within{border-color:#696057}
 
-#userInput {
+#userInput{
   flex:1;
   min-width:0;
   max-height:180px;
@@ -398,38 +426,39 @@ button { cursor:pointer; }
   outline:none;
   border:0;
   background:transparent;
-  color:white;
+  color:#f2f2f2;
   padding:7px 0;
   font-size:15px;
   line-height:1.5;
 }
 
-#userInput::placeholder { color:#999; }
+#userInput::placeholder{color:#999}
 
-.send-btn {
+.send-btn{
   width:37px;
   height:37px;
+  flex:0 0 37px;
   border:0;
   border-radius:50%;
   background:#e7e2db;
   color:#25211c;
   font-size:21px;
-  font-weight:bold;
+  font-weight:700;
   display:grid;
   place-items:center;
 }
 
-.send-btn:hover { background:white; }
-.send-btn:disabled { opacity:.4; }
+.send-btn:hover{background:#fff}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
 
-.composer-hint {
+.composer-hint{
   text-align:center;
   color:#858585;
   font-size:11px;
   margin-top:10px;
 }
 
-.toast {
+.toast{
   position:absolute;
   top:72px;
   left:50%;
@@ -438,17 +467,16 @@ button { cursor:pointer; }
   border:1px solid #494949;
   border-radius:10px;
   background:#303030;
-  color:white;
+  color:#eee;
   font-size:12px;
   display:none;
   z-index:5;
 }
 
-.overlay { display:none; }
-.mobile-menu { display:none; }
+.overlay{display:none}
 
-@media(max-width:700px) {
-  .sidebar {
+@media(max-width:700px){
+  .sidebar{
     position:fixed;
     z-index:10;
     inset:0 auto 0 0;
@@ -456,9 +484,9 @@ button { cursor:pointer; }
     box-shadow:15px 0 40px #0006;
   }
 
-  .sidebar.open { transform:translateX(0); }
+  .sidebar.open{transform:translateX(0)}
 
-  .overlay.show {
+  .overlay.show{
     display:block;
     position:fixed;
     inset:0;
@@ -466,129 +494,121 @@ button { cursor:pointer; }
     z-index:9;
   }
 
-  .mobile-menu { display:block; }
-  .topbar { padding:0 13px; }
-  .chat-scroll { padding:23px 15px; }
-  .composer-wrap { padding:8px 12px 14px; }
-  .message-body { max-width:86%; }
-  .suggestions { grid-template-columns:1fr; }
+  .mobile-menu{display:grid}
+  .topbar{padding:0 13px}
+  .chat-scroll{padding:23px 15px}
+  .composer-wrap{padding:8px 12px 14px}
+  .message-body{max-width:86%}
+  .suggestions{grid-template-columns:1fr}
+  .welcome{padding-bottom:45px}
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
-<aside class="sidebar" id="sidebar">
-
-  <div class="brand-row">
-    <div class="brand">
-      <div class="brand-mark">B</div>
-      <span>Brownie AI</span>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <span>Brownie AI</span>
+      </div>
+      <button class="icon-btn" onclick="closeSidebar()">‹</button>
     </div>
 
-    <button class="icon-btn" onclick="closeSidebar()">‹</button>
-  </div>
+    <button class="side-btn primary" onclick="newChat()">
+      <span>＋</span> New chat
+    </button>
 
-  <button class="side-btn" onclick="newChat()">＋ New chat</button>
+    <div class="side-label">Your space</div>
 
-  <div class="side-label">Your space</div>
+    <button class="side-btn" onclick="showTemporaryInfo()">
+      <span>◷</span> Temporary chat
+    </button>
 
-  <button class="side-btn" onclick="showTemporaryInfo()">
-    ◷ Temporary chat
-  </button>
+    <div class="side-note">
+      Temporary mode is on.<br>
+      Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.
+    </div>
+  </aside>
 
-  <div class="side-note">
-    Temporary mode is on.<br>
-    Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.
-  </div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-</aside>
+  <main class="main">
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <header class="topbar">
+      <div class="top-left">
+        <button class="icon-btn mobile-menu" onclick="openSidebar()">☰</button>
+        <div class="top-title">Brownie AI</div>
+      </div>
 
-<main class="main">
+      <div class="temp-pill">
+        <span class="temp-dot"></span>
+        Temporary chat
+      </div>
+    </header>
 
-<header class="topbar">
+    <div class="toast" id="toast"></div>
 
-  <div style="display:flex;align-items:center;gap:10px">
-    <button class="icon-btn mobile-menu" onclick="openSidebar()">☰</button>
-    <div class="top-title">Brownie AI</div>
-  </div>
+    <section class="chat-scroll" id="chatScroll">
+      <div class="chat-content" id="chatContent">
 
-  <div class="temp-pill">
-    <span class="temp-dot"></span>
-    Temporary chat
-  </div>
+        <div class="welcome" id="welcome">
+          <div class="welcome-mark">B</div>
 
-</header>
+          <h1>What can I help you <span>with?</span></h1>
 
-<div class="toast" id="toast"></div>
+          <p>Ask a question, explore an idea, or get something done.</p>
 
-<section class="chat-scroll" id="chatScroll">
+          <div class="suggestions">
 
-  <div class="chat-content" id="chatContent">
+            <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')">
+              <strong>✦ Learn something</strong>
+              Explain a topic in simple words
+            </button>
 
-    <div class="welcome" id="welcome">
+            <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')">
+              <strong>✧ Get creative</strong>
+              Brainstorm a project idea
+            </button>
 
-      <div class="welcome-mark">B</div>
+            <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')">
+              <strong>✎ Write something</strong>
+              Draft or improve a message
+            </button>
 
-      <h1>What can I help you <span>with?</span></h1>
+            <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')">
+              <strong>⌘ Solve a problem</strong>
+              Work through a problem step by step
+            </button>
 
-      <p>Ask a question, explore an idea, or get something done.</p>
+          </div>
+        </div>
 
-      <div class="suggestions">
+      </div>
+    </section>
 
-        <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')">
-          <strong>✦ Learn something</strong>
-          Explain a topic in simple words
-        </button>
+    <div class="composer-wrap">
+      <div class="composer-area">
 
-        <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')">
-          <strong>✧ Get creative</strong>
-          Brainstorm a project idea
-        </button>
+        <div class="composer">
+          <textarea id="userInput" rows="1"
+            placeholder="Message Brownie AI..."
+            aria-label="Message Brownie AI"></textarea>
 
-        <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')">
-          <strong>✎ Write something</strong>
-          Draft or improve a message
-        </button>
+          <button class="send-btn" id="sendBtn"
+            onclick="sendMessage()">↑</button>
+        </div>
 
-        <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')">
-          <strong>⌘ Solve a problem</strong>
-          Work through a problem step by step
-        </button>
+        <div class="composer-hint">
+          Brownie AI can make mistakes. Check important information.
+        </div>
 
       </div>
     </div>
 
-  </div>
-</section>
-
-<div class="composer-wrap">
-
-  <div class="composer-area">
-
-    <div class="composer">
-
-      <textarea id="userInput" rows="1"
-        placeholder="Message Brownie AI..."
-        aria-label="Message Brownie AI"></textarea>
-
-      <button class="send-btn" id="sendBtn"
-        onclick="sendMessage()">↑</button>
-
-    </div>
-
-    <div class="composer-hint">
-      Brownie AI can make mistakes. Check important information.
-    </div>
-
-  </div>
-</div>
-
-</main>
+  </main>
 </div>
 
 <script>
@@ -600,11 +620,11 @@ const sendBtn = document.getElementById("sendBtn");
 let history = [];
 let busy = false;
 
-function scrollToBottom() {
+function scrollToBottom(){
   chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
-function showToast(message) {
+function showToast(message){
   const toast = document.getElementById("toast");
   toast.textContent = message;
   toast.style.display = "block";
@@ -616,29 +636,28 @@ function showToast(message) {
   }, 2600);
 }
 
-function showTemporaryInfo() {
-  showToast("Temporary chat: messages disappear when you refresh or start a new chat.");
+function showTemporaryInfo(){
+  showToast("Temporary chat: messages are not saved and disappear when you refresh or start a new chat.");
 }
 
-function openSidebar() {
+function openSidebar(){
   document.getElementById("sidebar").classList.add("open");
   document.getElementById("overlay").classList.add("show");
 }
 
-function closeSidebar() {
+function closeSidebar(){
   document.getElementById("sidebar").classList.remove("open");
   document.getElementById("overlay").classList.remove("show");
 }
 
-function useSuggestion(text) {
+function useSuggestion(text){
   input.value = text;
   resizeInput();
   input.focus();
 }
 
-function addMessage(text, role, loading=false) {
+function addMessage(text, role, loading=false){
   const row = document.createElement("div");
-
   row.className = "message-row " +
     (role === "user" ? "user-row" : "bot-row");
 
@@ -656,18 +675,18 @@ function addMessage(text, role, loading=false) {
   const bubble = document.createElement("div");
   bubble.className = "bubble";
 
-  if (loading) {
+  if(loading){
     bubble.innerHTML =
       '<span class="typing"><i></i><i></i><i></i></span>';
-  } else {
+  }else{
     bubble.textContent = text;
   }
 
   body.append(name, bubble);
 
-  if (role === "user") {
+  if(role === "user"){
     row.append(body, avatar);
-  } else {
+  }else{
     row.append(avatar, body);
   }
 
@@ -677,7 +696,7 @@ function addMessage(text, role, loading=false) {
   return {row, bubble};
 }
 
-function addCopyButton(messageBody, text) {
+function addCopyButton(messageBody, text){
   const actions = document.createElement("div");
   actions.className = "message-actions";
 
@@ -686,14 +705,14 @@ function addCopyButton(messageBody, text) {
   copy.textContent = "Copy";
 
   copy.onclick = async () => {
-    try {
+    try{
       await navigator.clipboard.writeText(text);
       copy.textContent = "Copied";
 
       setTimeout(() => {
         copy.textContent = "Copy";
       }, 1200);
-    } catch {
+    }catch{
       showToast("Copy is not available in this browser.");
     }
   };
@@ -702,58 +721,110 @@ function addCopyButton(messageBody, text) {
   messageBody.appendChild(actions);
 }
 
-function sleep(ms) {
+function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Display normal text and **bold** phrases safely.
-function appendFormattedToken(container, token) {
+// Safely display normal text and **bold** phrases.
+function appendFormattedToken(container, token){
   const match = token.match(/^\*\*([\s\S]+)\*\*$/);
 
-  if (match) {
+  if(match){
     const strong = document.createElement("strong");
     strong.textContent = match[1];
     container.appendChild(strong);
-  } else {
+  }else{
     container.appendChild(document.createTextNode(token));
   }
 }
 
 // Reveal the reply gradually, like an assistant typing.
-async function revealReply(bubble, text) {
+async function revealReply(bubble, text){
   bubble.textContent = "";
 
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   bubble.appendChild(cursor);
 
-  const tokens =
-    text.match(/\*\*[\s\S]+?\*\*|\s+|[^\s]+/g) || [text];
+  const tokens = text.match(/\*\*[\s\S]+?\*\*|\s+|[^\s]+/g) || [text];
 
-  for (const token of tokens) {
+  for(const token of tokens){
     const part = document.createElement("span");
-
     appendFormattedToken(part, token);
-
     bubble.insertBefore(part, cursor);
-
     scrollToBottom();
 
     await sleep(token.trim() ? 55 : 18);
   }
 
   cursor.remove();
+  await typesetReply(bubble, text);
 }
 
-async function sendMessage() {
+// Escape HTML so model responses cannot inject arbitrary markup.
+function escapeHtml(value){
+  return value.replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[ch]);
+}
+
+// Preserve Markdown bold while keeping LaTeX notation intact.
+function formatReplyHtml(text){
+  let safe = escapeHtml(text);
+
+  safe = safe.replace(
+    /\*\*([\s\S]+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  return safe;
+}
+
+// Render all supported MathJax expressions in the reply.
+async function typesetReply(bubble, text){
+  bubble.innerHTML = formatReplyHtml(text);
+
+  try{
+    if(!window.MathJax || !window.MathJax.typesetPromise){
+      const mathScript = document.getElementById("mathjax-script");
+
+      if(mathScript){
+        await new Promise(resolve => {
+          mathScript.addEventListener("load", resolve, {once:true});
+          mathScript.addEventListener("error", resolve, {once:true});
+        });
+      }
+    }
+
+    if(window.MathJax && window.MathJax.startup &&
+       window.MathJax.startup.promise){
+      await window.MathJax.startup.promise;
+    }
+
+    if(window.MathJax && window.MathJax.typesetPromise){
+      await window.MathJax.typesetPromise([bubble]);
+    }
+
+  }catch(error){
+    console.error("Math rendering error:", error);
+  }
+
+  scrollToBottom();
+}
+
+async function sendMessage(){
 
   const message = input.value.trim();
 
-  if (!message || busy) return;
+  if(!message || busy) return;
 
   const welcome = document.getElementById("welcome");
 
-  if (welcome) welcome.remove();
+  if(welcome) welcome.remove();
 
   input.value = "";
   resizeInput();
@@ -766,8 +837,8 @@ async function sendMessage() {
   const loading = addMessage("", "bot", true);
 
   const requestText = [...history, {
-    role: "user",
-    content: message
+    role:"user",
+    content:message
   }]
   .map(item =>
     (item.role === "user" ? "User" : "Brownie AI")
@@ -775,33 +846,32 @@ async function sendMessage() {
   )
   .join("\n\n");
 
-  try {
+  try{
 
     const response = await fetch("/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
       },
-      body: JSON.stringify({
-        message: requestText
+      body:JSON.stringify({
+        message:requestText
       })
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Server error");
+    if(!response.ok){
+      throw new Error(data.error || "The server returned an error.");
     }
 
     const reply = data.reply ||
       "I couldn't generate a response. Please try again.";
 
-    // Gradual response with bold formatting.
     await revealReply(loading.bubble, reply);
 
     history.push(
-      {role: "user", content: message},
-      {role: "assistant", content: reply}
+      {role:"user", content:message},
+      {role:"assistant", content:reply}
     );
 
     addCopyButton(
@@ -809,12 +879,12 @@ async function sendMessage() {
       reply
     );
 
-  } catch (error) {
+  }catch(error){
 
     loading.bubble.textContent =
       "Sorry, something went wrong: " + error.message;
 
-  } finally {
+  }finally{
 
     busy = false;
     sendBtn.disabled = false;
@@ -824,9 +894,9 @@ async function sendMessage() {
   }
 }
 
-function newChat() {
+function newChat(){
 
-  if (busy) {
+  if(busy){
     showToast("Please wait for the current response to finish.");
     return;
   }
@@ -872,16 +942,16 @@ function newChat() {
   showToast("New temporary chat started.");
 }
 
-function resizeInput() {
+function resizeInput(){
   input.style.height = "auto";
   input.style.height =
-    Math.min(input.scrollHeight, 180) + "px";
+    Math.min(input.scrollHeight,180) + "px";
 }
 
 input.addEventListener("input", resizeInput);
 
 input.addEventListener("keydown", event => {
-  if (event.key === "Enter" && !event.shiftKey) {
+  if(event.key === "Enter" && !event.shiftKey){
     event.preventDefault();
     sendMessage();
   }
