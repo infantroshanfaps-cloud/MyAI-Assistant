@@ -21,6 +21,8 @@ window.MathJax = {
 };
 </script>
 <script id="mathjax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 
 <style>
 :root{
@@ -122,6 +124,51 @@ button{cursor:pointer}
   border:1px solid #494949;border-radius:10px;background:#303030;color:#eee;font-size:12px;
   box-shadow:0 8px 25px #0005;display:none;z-index:5}
 .overlay{display:none}
+
+/* Voice, document upload and appearance controls */
+.composer-tools{display:flex;align-items:center;gap:5px}
+.tool-btn{width:36px;height:36px;flex:0 0 36px;border:0;border-radius:50%;background:transparent;color:#c9c9c9;font-size:17px;display:grid;place-items:center}
+.tool-btn:hover{background:#414141;color:#fff}
+.tool-btn.active{background:#624b38;color:#ffe0b8}
+#fileInput{display:none}
+.attachments{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 8px;padding:0 5px}
+.file-chip{display:flex;align-items:center;gap:7px;max-width:100%;padding:6px 9px;border:1px solid #494949;border-radius:10px;background:#292929;color:#ddd;font-size:11px}
+.file-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px}
+.file-chip button{border:0;background:transparent;color:#aaa;font-size:15px}
+.settings-modal{display:none;position:fixed;inset:0;z-index:30;background:#0009;align-items:center;justify-content:center;padding:18px}
+.settings-modal.open{display:flex}
+.settings-card{width:min(430px,100%);background:#252525;color:#eee;border:1px solid #444;border-radius:18px;padding:20px;box-shadow:0 20px 70px #0008}
+.settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.settings-head h2{font-size:18px}
+.settings-close{border:0;background:transparent;color:#bbb;font-size:23px}
+.setting-group{padding:13px 0;border-top:1px solid #3b3b3b}
+.setting-label{display:block;font-size:13px;font-weight:650;margin-bottom:9px}
+.setting-select{width:100%;padding:10px;border-radius:9px;border:1px solid #505050;background:#333;color:#eee}
+.setting-help{font-size:11px;color:#999;line-height:1.5;margin-top:7px}
+.read-btn.speaking{color:var(--accent);background:#45403a}
+[data-theme="light"]{--bg:#f5f5f5;--sidebar:#eaeaea;--panel:#fff;--panel2:#f0f0f0;--text:#222;--muted:#666;--line:#ddd;--user:#e6e6e6}
+[data-theme="light"] body{background:var(--bg);color:var(--text)}
+[data-theme="light"] .topbar{border-color:#ddd}
+[data-theme="light"] .side-btn{color:#333;border-color:#d2d2d2}
+[data-theme="light"] .side-btn.primary,[data-theme="light"] .suggestion{background:#fff;color:#333;border-color:#ddd}
+[data-theme="light"] .suggestion strong{color:#222}
+[data-theme="light"] .top-title,[data-theme="light"] .welcome h1{color:#222}
+[data-theme="light"] .welcome p,[data-theme="light"] .message-name{color:#666}
+[data-theme="light"] .model-select{background:#fff;color:#222;border-color:#ccc}
+[data-theme="light"] .temp-pill{background:#fff5e9;color:#79552e;border-color:#e4cfb5}
+[data-theme="light"] .composer{background:#fff;border-color:#ccc}
+[data-theme="light"] #userInput{color:#222}
+[data-theme="light"] #userInput::placeholder{color:#777}
+[data-theme="light"] .user-row .bubble{background:#e8e8e8;color:#222}
+[data-theme="light"] .bubble strong{color:#111}
+[data-theme="light"] .tool-btn{color:#555}
+[data-theme="light"] .tool-btn:hover{background:#ddd;color:#111}
+[data-theme="light"] .file-chip{background:#fff;color:#333;border-color:#ccc}
+[data-theme="light"] .settings-card{background:#fff;color:#222;border-color:#ccc}
+[data-theme="light"] .setting-group{border-color:#ddd}
+[data-theme="light"] .setting-select{background:#f7f7f7;color:#222;border-color:#ccc}
+[data-theme="light"] .composer-hint{color:#666}
+
 @media(max-width:700px){
   .sidebar{position:fixed;z-index:10;inset:0 auto 0 0;transform:translateX(-100%);box-shadow:15px 0 40px #0006}
   .sidebar.open{transform:translateX(0)}
@@ -139,6 +186,7 @@ button{cursor:pointer}
 }
 </style>
 </head>
+
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
@@ -151,7 +199,9 @@ button{cursor:pointer}
     <button class="side-btn" onclick="showTemporaryInfo()"><span>◷</span> Temporary chat</button>
     <div class="side-note">Temporary mode is on.<br>Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.</div>
   </aside>
+
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
   <main class="main">
     <header class="topbar">
       <div class="top-left">
@@ -159,8 +209,7 @@ button{cursor:pointer}
         <div class="top-title">Brownie AI <span style="color:#888;font-weight:400">⌄</span></div>
       </div>
       <div class="top-actions">
-        <select class="model-select" id="modelSelect" aria-label="Choose an AI model"
-          onchange="selectModel(this.value)">
+        <select class="model-select" id="modelSelect" aria-label="Choose an AI model" onchange="selectModel(this.value)">
           <option value="brownie-lite">Brownie 4.2 Lite — Default</option>
           <option value="brownie-standard">Brownie 4.8 Standard</option>
           <option value="puppy-fast">Puppy 5.3 Fast</option>
@@ -173,10 +222,13 @@ button{cursor:pointer}
           <option value="bunty-research">Bunty 12.4 Research</option>
           <option value="buddy-devotional">Buddy 13.8a Devotional</option>
         </select>
+        <button class="icon-btn" onclick="openSettings()" title="Appearance settings" aria-label="Appearance settings">⚙</button>
         <div class="temp-pill"><span class="temp-dot"></span> Temporary chat</div>
       </div>
     </header>
+
     <div class="toast" id="toast"></div>
+
     <section class="chat-scroll" id="chatScroll">
       <div class="chat-content" id="chatContent">
         <div class="welcome" id="welcome">
@@ -192,24 +244,70 @@ button{cursor:pointer}
         </div>
       </div>
     </section>
+
     <div class="composer-wrap">
       <div class="composer-area">
+        <div class="attachments" id="attachments"></div>
         <div class="composer">
+          <input id="fileInput" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" multiple>
+          <button class="tool-btn" type="button" onclick="document.getElementById('fileInput').click()" title="Attach PDF, DOCX or TXT" aria-label="Attach document">＋</button>
           <textarea id="userInput" rows="1" placeholder="Message Brownie AI..." aria-label="Message Brownie AI"></textarea>
-          <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">↑</button>
+          <div class="composer-tools">
+            <button class="tool-btn" id="micBtn" type="button" onclick="toggleVoiceInput()" title="Voice input" aria-label="Voice input">🎙</button>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">↑</button>
+          </div>
         </div>
         <div class="composer-hint">Brownie AI can make mistakes. Check important information.</div>
       </div>
     </div>
   </main>
 </div>
+
+<!-- Appearance settings panel -->
+<div class="settings-modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-card">
+    <div class="settings-head">
+      <h2 id="settingsTitle">Appearance settings</h2>
+      <button class="settings-close" onclick="closeSettings()" aria-label="Close settings">×</button>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="themeSelect">Theme</label>
+      <select class="setting-select" id="themeSelect" onchange="setTheme(this.value)">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="system">System</option>
+      </select>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label" for="accentSelect">Accent colour</label>
+      <select class="setting-select" id="accentSelect" onchange="setAccent(this.value)">
+        <option value="#d6a66f">Brownie Gold</option>
+        <option value="#8b9cf6">Blue</option>
+        <option value="#72b99a">Green</option>
+        <option value="#c58be0">Purple</option>
+        <option value="#e58b9b">Rose</option>
+      </select>
+      <p class="setting-help">Your appearance choices are saved in this browser.</p>
+    </div>
+  </div>
+</div>
+
 <script>
 const chatContent = document.getElementById("chatContent");
 const chatScroll = document.getElementById("chatScroll");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
+
 let history = [];
 let busy = false;
+let selectedFiles = [];
+let recognition = null;
+let currentlySpeakingButton = null;
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
 
 let shouldAutoScroll = true;
 
@@ -227,9 +325,249 @@ chatScroll.addEventListener("scroll", () => {
 
 function showToast(message){
   const toast=document.getElementById("toast");
-  toast.textContent=message;toast.style.display="block";
-  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.style.display="none",2600);
+  toast.textContent=message;
+  toast.style.display="block";
+  clearTimeout(showToast.timer);
+  showToast.timer=setTimeout(()=>toast.style.display="none",2600);
 }
+
+/* APPEARANCE SETTINGS */
+
+function openSettings(){
+  document.getElementById("settingsModal").classList.add("open");
+}
+
+function closeSettings(){
+  document.getElementById("settingsModal").classList.remove("open");
+}
+
+function setTheme(choice){
+  const actual = choice === "system"
+    ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+    : choice;
+
+  document.documentElement.dataset.theme = actual;
+  localStorage.setItem("brownie-theme-choice", choice);
+}
+
+function setAccent(color){
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty("--accent-hover", color);
+  localStorage.setItem("brownie-accent", color);
+}
+
+(function loadAppearance(){
+  const savedTheme=localStorage.getItem("brownie-theme-choice")||"dark";
+  const savedAccent=localStorage.getItem("brownie-accent")||"#d6a66f";
+
+  document.getElementById("themeSelect").value=savedTheme;
+  document.getElementById("accentSelect").value=savedAccent;
+
+  setTheme(savedTheme);
+  setAccent(savedAccent);
+})();
+
+/* VOICE INPUT */
+
+function toggleVoiceInput(){
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+    showToast("Voice input is not supported in this browser. Try Chrome or Edge.");
+    return;
+  }
+
+  if(recognition){
+    recognition.stop();
+    recognition=null;
+    document.getElementById("micBtn").classList.remove("active");
+    return;
+  }
+
+  recognition=new SpeechRecognition();
+  recognition.lang=navigator.language||"en-IN";
+  recognition.interimResults=true;
+  recognition.continuous=false;
+
+  const mic=document.getElementById("micBtn");
+  mic.classList.add("active");
+
+  recognition.onresult=(event)=>{
+    let finalText="", interimText="";
+
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      if(event.results[i].isFinal){
+        finalText+=event.results[i][0].transcript;
+      }else{
+        interimText+=event.results[i][0].transcript;
+      }
+    }
+
+    if(finalText){
+      input.value=(input.value?input.value+" ":"")+finalText;
+      resizeInput();
+    }
+
+    mic.title=interimText?"Hearing: "+interimText:"Voice input";
+  };
+
+  recognition.onerror=(event)=>{
+    showToast(event.error==="not-allowed"
+      ?"Please allow microphone access in your browser."
+      :"Voice input stopped: "+event.error);
+  };
+
+  recognition.onend=()=>{
+    recognition=null;
+    mic.classList.remove("active");
+    mic.title="Voice input";
+  };
+
+  try{
+    recognition.start();
+    showToast("Listening... speak now.");
+  }catch(e){
+    recognition=null;
+    mic.classList.remove("active");
+    showToast("Could not start the microphone.");
+  }
+}
+
+/* READ ALOUD */
+
+function readAloud(text, button){
+  if(!("speechSynthesis" in window)){
+    showToast("Read aloud is not supported in this browser.");
+    return;
+  }
+
+  if(window.speechSynthesis.speaking && currentlySpeakingButton===button){
+    window.speechSynthesis.cancel();
+    button.classList.remove("speaking");
+    currentlySpeakingButton=null;
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  if(currentlySpeakingButton){
+    currentlySpeakingButton.classList.remove("speaking");
+  }
+
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.rate=1;
+  utterance.pitch=1;
+
+  utterance.onend=()=>{
+    button.classList.remove("speaking");
+    currentlySpeakingButton=null;
+  };
+
+  utterance.onerror=()=>{
+    button.classList.remove("speaking");
+    currentlySpeakingButton=null;
+  };
+
+  button.classList.add("speaking");
+  currentlySpeakingButton=button;
+  window.speechSynthesis.speak(utterance);
+}
+
+/* DOCUMENT UPLOAD */
+
+const fileInput=document.getElementById("fileInput");
+
+fileInput.addEventListener("change",()=>{
+  const incoming=Array.from(fileInput.files||[]);
+
+  for(const file of incoming){
+    if(!selectedFiles.some(existing=>
+      existing.name===file.name && existing.size===file.size
+    )){
+      selectedFiles.push(file);
+    }
+  }
+
+  renderAttachments();
+  fileInput.value="";
+});
+
+function renderAttachments(){
+  const area=document.getElementById("attachments");
+  area.innerHTML="";
+
+  selectedFiles.forEach((file,index)=>{
+    const chip=document.createElement("div");
+    chip.className="file-chip";
+
+    const label=document.createElement("span");
+    label.textContent="📄 "+file.name;
+
+    const remove=document.createElement("button");
+    remove.type="button";
+    remove.textContent="×";
+    remove.title="Remove file";
+
+    remove.onclick=()=>{
+      selectedFiles.splice(index,1);
+      renderAttachments();
+    };
+
+    chip.append(label,remove);
+    area.appendChild(chip);
+  });
+}
+
+async function extractDocumentText(file){
+  const ext=file.name.split(".").pop().toLowerCase();
+
+  if(file.size>15*1024*1024){
+    throw new Error(file.name+" is larger than 15 MB. Please use a smaller file.");
+  }
+
+  if(ext==="txt"){
+    return await file.text();
+  }
+
+  if(ext==="docx"){
+    if(!window.mammoth){
+      throw new Error("DOCX reader could not load. Check your internet connection.");
+    }
+
+    const arrayBuffer=await file.arrayBuffer();
+    const result=await mammoth.extractRawText({arrayBuffer});
+    return result.value;
+  }
+
+  if(ext==="pdf"){
+    if(!window.pdfjsLib){
+      throw new Error("PDF reader could not load. Check your internet connection.");
+    }
+
+    const data=new Uint8Array(await file.arrayBuffer());
+    const pdf=await pdfjsLib.getDocument({data}).promise;
+    let pages=[];
+
+    const maxPages=Math.min(pdf.numPages,100);
+
+    for(let pageNo=1;pageNo<=maxPages;pageNo++){
+      const page=await pdf.getPage(pageNo);
+      const content=await page.getTextContent();
+      pages.push(content.items.map(item=>item.str).join(" "));
+    }
+
+    if(pdf.numPages>maxPages){
+      pages.push("[Only the first 100 pages were extracted.]");
+    }
+
+    return pages.join("\n\n");
+  }
+
+  throw new Error("Unsupported file type: "+file.name+". Upload PDF, DOCX or TXT.");
+}
+
+/* MODEL OPTIONS */
 
 const modelDetails = {
   "brownie-lite": {name:"Brownie 4.2 Lite", purpose:"Everyday questions"},
@@ -248,40 +586,94 @@ const modelDetails = {
 function selectModel(value){
   const selected = modelDetails[value];
   if(!selected) return;
-  showToast(selected.name + " selected — " + selected.purpose + ". All options currently use the same Gemini backend.");
+
+  showToast(selected.name + " selected — " + selected.purpose +
+    ". All options currently use the same Gemini backend.");
 }
 
 function showTemporaryInfo(){
   showToast("Temporary chat: messages are not saved and disappear when you refresh or start a new chat.");
 }
-function openSidebar(){document.getElementById("sidebar").classList.add("open");document.getElementById("overlay").classList.add("show");}
-function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
-function useSuggestion(text){input.value=text;resizeInput();input.focus();}
+
+function openSidebar(){
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+}
+
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+}
+
+function useSuggestion(text){
+  input.value=text;
+  resizeInput();
+  input.focus();
+}
 
 function addMessage(text, role, loading=false){
   const row=document.createElement("div");
   row.className="message-row "+(role==="user"?"user-row":"bot-row");
-  const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=role==="user"?"Y":"B";
-  const body=document.createElement("div");body.className="message-body";
-  const name=document.createElement("div");name.className="message-name";name.textContent=role==="user"?"You":"Brownie AI";
-  const bubble=document.createElement("div");bubble.className="bubble";
+
+  const avatar=document.createElement("div");
+  avatar.className="avatar";
+  avatar.textContent=role==="user"?"Y":"B";
+
+  const body=document.createElement("div");
+  body.className="message-body";
+
+  const name=document.createElement("div");
+  name.className="message-name";
+  name.textContent=role==="user"?"You":"Brownie AI";
+
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+
   if(loading){
     bubble.innerHTML='<span class="typing" aria-label="Brownie AI is thinking"><i></i><i></i><i></i></span>';
-  }else{bubble.textContent=text;}
+  }else{
+    bubble.textContent=text;
+  }
+
   body.append(name,bubble);
-  if(role==="user")row.append(body,avatar);else row.append(avatar,body);
-  chatContent.appendChild(row);scrollToBottom();
+
+  if(role==="user"){
+    row.append(body,avatar);
+  }else{
+    row.append(avatar,body);
+  }
+
+  chatContent.appendChild(row);
+  scrollToBottom();
+
   return {row,bubble};
 }
 
 function addCopyButton(messageBody, text){
-  const actions=document.createElement("div");actions.className="message-actions";
-  const copy=document.createElement("button");copy.className="mini-action";copy.textContent="Copy";
+  const actions=document.createElement("div");
+  actions.className="message-actions";
+
+  const copy=document.createElement("button");
+  copy.className="mini-action";
+  copy.textContent="Copy";
+
   copy.onclick=async()=>{
-    try{await navigator.clipboard.writeText(text);copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy",1200);}
-    catch{showToast("Copy is not available in this browser.");}
+    try{
+      await navigator.clipboard.writeText(text);
+      copy.textContent="Copied";
+      setTimeout(()=>copy.textContent="Copy",1200);
+    }catch{
+      showToast("Copy is not available in this browser.");
+    }
   };
-  actions.appendChild(copy);messageBody.appendChild(actions);
+
+  const speak=document.createElement("button");
+  speak.className="mini-action read-btn";
+  speak.textContent="🔊 Read aloud";
+  speak.onclick=()=>readAloud(text,speak);
+
+  actions.append(copy,speak);
+  messageBody.appendChild(actions);
 }
 
 function sleep(ms){
@@ -290,6 +682,7 @@ function sleep(ms){
 
 function appendFormattedToken(container, token){
   const match = token.match(/^\*\*([\s\S]+)\*\*$/);
+
   if(match){
     const strong = document.createElement("strong");
     strong.textContent = match[1];
@@ -301,6 +694,7 @@ function appendFormattedToken(container, token){
 
 async function revealReply(bubble, text){
   bubble.textContent = "";
+
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   bubble.appendChild(cursor);
@@ -321,7 +715,11 @@ async function revealReply(bubble, text){
 
 function escapeHtml(value){
   return value.replace(/[&<>"']/g, ch => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   })[ch]);
 }
 
@@ -334,64 +732,139 @@ function formatReplyHtml(text){
 async function typesetReply(bubble, text){
   bubble.innerHTML = formatReplyHtml(text);
 
-  try {
-    if (!window.MathJax || !window.MathJax.typesetPromise) {
+  try{
+    if(!window.MathJax || !window.MathJax.typesetPromise){
       const mathScript = document.getElementById("mathjax-script");
-      if (mathScript) {
-        await new Promise(resolve => {
-          mathScript.addEventListener("load", resolve, { once:true });
-          mathScript.addEventListener("error", resolve, { once:true });
+
+      if(mathScript){
+        await new Promise(resolve=>{
+          mathScript.addEventListener("load",resolve,{once:true});
+          mathScript.addEventListener("error",resolve,{once:true});
         });
       }
     }
 
-    if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+    if(window.MathJax && window.MathJax.startup && window.MathJax.startup.promise){
       await window.MathJax.startup.promise;
     }
 
-    if (window.MathJax && window.MathJax.typesetPromise) {
+    if(window.MathJax && window.MathJax.typesetPromise){
       await window.MathJax.typesetPromise([bubble]);
     }
-  } catch(error) {
-    console.error("Math rendering error:", error);
+  }catch(error){
+    console.error("Math rendering error:",error);
   }
 
   scrollToBottom();
 }
 
+/* SEND MESSAGE */
+
 async function sendMessage(){
-  const message=input.value.trim();
-  if(!message||busy)return;
-  const welcome=document.getElementById("welcome");if(welcome)welcome.remove();
-  input.value="";resizeInput();busy=true;sendBtn.disabled=true;
-  shouldAutoScroll = true;
-  addMessage(message,"user");
+  const question=input.value.trim();
+
+  if((!question&&selectedFiles.length===0)||busy)return;
+
+  const welcome=document.getElementById("welcome");
+  if(welcome)welcome.remove();
+
+  busy=true;
+  sendBtn.disabled=true;
+  shouldAutoScroll=true;
+
+  if(recognition){
+    recognition.stop();
+    recognition=null;
+    document.getElementById("micBtn").classList.remove("active");
+  }
+
+  const filesToSend=[...selectedFiles];
+  selectedFiles=[];
+  renderAttachments();
+
+  input.value="";
+  resizeInput();
+
+  const visibleQuestion=question||
+    (filesToSend.length?"Please analyse the attached document(s).":"");
+
+  addMessage(
+    visibleQuestion+(filesToSend.length
+      ?"\n\n📎 "+filesToSend.map(f=>f.name).join(", ")
+      :""),
+    "user"
+  );
+
   const loading=addMessage("","bot",true);
 
-  const requestText=[...history,{role:"user",content:message}]
-    .map(item=>(item.role==="user"?"User":"Brownie AI")+":\n"+item.content).join("\n\n");
-
   try{
+    let documentContext="";
+
+    if(filesToSend.length){
+      showToast("Reading your document(s)...");
+
+      for(const file of filesToSend){
+        const extracted=await extractDocumentText(file);
+
+        if(!extracted.trim()){
+          throw new Error(file.name+
+            " contains no extractable text. Scanned PDFs may need OCR first.");
+        }
+
+        documentContext+="\n\n--- DOCUMENT: "+file.name+" ---\n"+
+          extracted.slice(0,60000);
+      }
+    }
+
+    const currentUserContent=visibleQuestion+
+      (documentContext?"\n\nAttached document content:"+documentContext:"");
+
+    const requestText=[...history,{role:"user",content:currentUserContent}]
+      .map(item=>(item.role==="user"?"User":"Brownie AI")+":\n"+item.content)
+      .join("\n\n");
+
     const response=await fetch("/chat",{
-      method:"POST",headers:{"Content-Type":"application/json"},
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message:requestText})
     });
+
     const data=await response.json();
-    if(!response.ok)throw new Error(data.error||"The server returned an error.");
+
+    if(!response.ok){
+      throw new Error(data.error||"The server returned an error.");
+    }
+
     const reply=data.reply||"I couldn't generate a response. Please try again.";
-    await revealReply(loading.bubble, reply);
-    history.push({role:"user",content:message},{role:"assistant",content:reply});
+
+    await revealReply(loading.bubble,reply);
+
+    history.push(
+      {role:"user",content:currentUserContent},
+      {role:"assistant",content:reply}
+    );
+
     addCopyButton(loading.row.querySelector(".message-body"),reply);
+
   }catch(error){
     loading.bubble.textContent="Sorry, something went wrong: "+error.message;
+    showToast(error.message);
   }finally{
-    busy=false;sendBtn.disabled=false;input.focus();scrollToBottom();
+    busy=false;
+    sendBtn.disabled=false;
+    input.focus();
+    scrollToBottom();
   }
 }
 
 function newChat(){
-  if(busy){showToast("Please wait for the current response to finish.");return;}
+  if(busy){
+    showToast("Please wait for the current response to finish.");
+    return;
+  }
+
   history=[];
+
   chatContent.innerHTML=`
     <div class="welcome" id="welcome">
       <div class="welcome-mark">B</div>
@@ -404,16 +877,37 @@ function newChat(){
         <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')"><strong>⌘ Solve a problem</strong>Work through a problem step by step</button>
       </div>
     </div>`;
-  input.value="";resizeInput();closeSidebar();showToast("New temporary chat started.");
+
+  input.value="";
+  selectedFiles=[];
+  renderAttachments();
+  resizeInput();
+  closeSidebar();
+  showToast("New temporary chat started.");
 }
 
 function resizeInput(){
   input.style.height="auto";
   input.style.height=Math.min(input.scrollHeight,180)+"px";
 }
+
 input.addEventListener("input",resizeInput);
+
 input.addEventListener("keydown",event=>{
-  if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();sendMessage();}
+  if(event.key==="Enter"&&!event.shiftKey){
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")closeSettings();
+});
+
+window.matchMedia("(prefers-color-scheme: light)").addEventListener?.("change",()=>{
+  if(localStorage.getItem("brownie-theme-choice")==="system"){
+    setTheme("system");
+  }
 });
 </script>
 </body>
