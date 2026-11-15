@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#212121">
 <title>Brownie AI</title>
 
-<!-- MathJax: renders LaTeX mathematics -->
 <script>
 window.MathJax = {
   tex: {
@@ -21,481 +20,117 @@ window.MathJax = {
   startup: { typeset: false }
 };
 </script>
-<script id="mathjax-script" defer
-src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script id="mathjax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
 <style>
 :root{
-  --bg:#212121;
-  --sidebar:#171717;
-  --text:#ececec;
-  --accent:#d6a66f;
-  --user:#303030;
+  --bg:#212121;--sidebar:#171717;--panel:#2f2f2f;--panel2:#262626;
+  --text:#ececec;--muted:#a1a1aa;--line:#343434;--accent:#d6a66f;
+  --accent-hover:#e6b982;--user:#303030;--danger:#ef7777;
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
-
-body{
-  height:100vh;
-  overflow:hidden;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
-
+body{height:100vh;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button,input{font:inherit}
 button{cursor:pointer}
-
 .app{height:100vh;display:flex}
-
-.sidebar{
-  width:265px;
-  flex:0 0 265px;
-  background:var(--sidebar);
-  padding:17px 13px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-  border-right:1px solid #242424;
-  transition:transform .2s ease;
-}
-
-.brand-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:3px 5px 8px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:700;
-  font-size:19px;
-}
-
-.brand-mark{
-  width:31px;
-  height:31px;
-  border-radius:11px;
-  background:linear-gradient(145deg,#e9c08e,#a9794b);
-  display:grid;
-  place-items:center;
-  color:#20170f;
-  font-weight:900;
-}
-
-.icon-btn{
-  width:36px;
-  height:36px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:#b8b8b8;
-  display:grid;
-  place-items:center;
-  font-size:19px;
-}
-
-.icon-btn:hover,.side-btn:hover{
-  background:#292929;
-  color:white;
-}
-
-.side-btn{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:11px 12px;
-  border:1px solid #353535;
-  border-radius:11px;
-  background:transparent;
-  color:#e6e6e6;
-  text-align:left;
-  font-size:14px;
-}
-
+.sidebar{width:265px;flex:0 0 265px;background:var(--sidebar);padding:17px 13px;
+  display:flex;flex-direction:column;gap:18px;border-right:1px solid #242424;
+  transition:transform .2s ease}
+.brand-row{display:flex;align-items:center;justify-content:space-between;padding:3px 5px 8px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.4px}
+.brand-mark{width:31px;height:31px;border-radius:11px;background:linear-gradient(145deg,#e9c08e,#a9794b);
+  display:grid;place-items:center;color:#20170f;font-weight:900;font-size:17px}
+.icon-btn{width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:#b8b8b8;
+  display:grid;place-items:center;font-size:19px}
+.icon-btn:hover,.side-btn:hover{background:#292929;color:#fff}
+.side-btn{width:100%;display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid #353535;
+  border-radius:11px;background:transparent;color:#e6e6e6;text-align:left;font-size:14px}
 .side-btn.primary{background:#242424}
-
-.side-label{
-  color:#858585;
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1.1px;
-  padding:10px 10px 0;
-}
-
-.side-note{
-  margin-top:auto;
-  padding:12px 10px;
-  color:#858585;
-  font-size:12px;
-  line-height:1.55;
-}
-
-.main{
-  min-width:0;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
-
-.topbar{
-  height:62px;
-  flex:0 0 62px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 24px;
-  border-bottom:1px solid #303030;
-}
-
-.top-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
+.side-label{color:#858585;font-size:11px;text-transform:uppercase;letter-spacing:1.1px;
+  padding:10px 10px 0}
+.side-note{margin-top:auto;padding:12px 10px;color:#858585;font-size:12px;line-height:1.55}
+.main{min-width:0;flex:1;display:flex;flex-direction:column;position:relative}
+.topbar{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;border-bottom:1px solid #303030}
+.top-left{display:flex;align-items:center;gap:10px}
 .mobile-menu{display:none}
-
-.top-title{
-  font-size:15px;
-  font-weight:600;
+.top-title{font-size:15px;font-weight:600}
+.model-select{
+  background:#2b2b2b;color:#e8e8e8;border:1px solid #454545;
+  border-radius:10px;padding:8px 30px 8px 11px;font-size:12px;
+  outline:none;max-width:260px;
 }
-
-.temp-pill{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:7px 11px;
-  border:1px solid #48413a;
-  border-radius:20px;
-  color:#e1bd94;
-  font-size:12px;
-  background:#302a24;
-}
-
-.temp-dot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#d6a66f;
-}
-
-.chat-scroll{
-  flex:1;
-  overflow-y:auto;
-  padding:30px 20px 24px;
-  scroll-behavior:smooth;
-}
-
-.chat-content{
-  max-width:790px;
-  margin:0 auto;
-  min-height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-.welcome{
-  margin:auto;
-  text-align:center;
-  padding:35px 10px 70px;
-}
-
-.welcome-mark{
-  width:58px;
-  height:58px;
-  margin:0 auto 22px;
-  border-radius:20px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(145deg,#e9c08e,#a9794b);
-  color:#21170f;
-  font-size:28px;
-  font-weight:900;
-}
-
-.welcome h1{
-  font-size:clamp(27px,4vw,36px);
-  font-weight:650;
-  margin-bottom:12px;
-}
-
+.model-select:focus{border-color:#b58c61}
+.top-actions{display:flex;align-items:center;gap:10px}
+.temp-pill{display:flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #48413a;
+  border-radius:20px;color:#e1bd94;font-size:12px;background:#302a24}
+.temp-dot{width:7px;height:7px;border-radius:50%;background:#d6a66f}
+.chat-scroll{flex:1;overflow-y:auto;padding:30px 20px 24px;scroll-behavior:smooth}
+.chat-content{max-width:790px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.welcome{margin:auto;text-align:center;padding:35px 10px 70px}
+.welcome-mark{width:58px;height:58px;margin:0 auto 22px;border-radius:20px;
+  display:grid;place-items:center;background:linear-gradient(145deg,#e9c08e,#a9794b);
+  color:#21170f;font-size:28px;font-weight:900;box-shadow:0 8px 30px #0003}
+.welcome h1{font-size:clamp(27px,4vw,36px);font-weight:650;letter-spacing:-1.2px;margin-bottom:12px}
 .welcome h1 span{color:#d6a66f}
-
-.welcome p{
-  color:#a3a3a3;
-  font-size:14px;
-}
-
-.suggestions{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  max-width:620px;
-  margin:28px auto 0;
-}
-
-.suggestion{
-  border:1px solid #3c3c3c;
-  border-radius:13px;
-  background:#262626;
-  color:#d7d7d7;
-  padding:14px;
-  text-align:left;
-  font-size:13px;
-  line-height:1.45;
-}
-
-.suggestion:hover{
-  background:#303030;
-  border-color:#5b5147;
-}
-
-.suggestion strong{
-  display:block;
-  color:#eee;
-  margin-bottom:4px;
-}
-
-.message-row{
-  display:flex;
-  gap:13px;
-  margin:0 0 25px;
-  align-items:flex-start;
-}
-
+.welcome p{color:#a3a3a3;font-size:14px}
+.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+  max-width:620px;margin:28px auto 0}
+.suggestion{border:1px solid #3c3c3c;border-radius:13px;background:#262626;color:#d7d7d7;
+  padding:14px;text-align:left;font-size:13px;line-height:1.45}
+.suggestion:hover{background:#303030;border-color:#5b5147}
+.suggestion strong{display:block;color:#eee;font-size:13px;margin-bottom:4px}
+.message-row{display:flex;gap:13px;margin:0 0 25px;align-items:flex-start}
 .message-row.user-row{justify-content:flex-end}
-
-.avatar{
-  width:29px;
-  height:29px;
-  flex:0 0 29px;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  background:#3a3027;
-  color:#e3bb8c;
-  font-weight:800;
-  margin-top:2px;
-}
-
-.user-row .avatar{
-  background:#3c3c3c;
-  color:#eee;
-  order:2;
-}
-
-.message-body{
-  max-width:min(78%,680px);
-  min-width:0;
-}
-
-.message-name{
-  font-size:12px;
-  color:#a5a5a5;
-  margin:0 0 6px 2px;
-}
-
+.avatar{width:29px;height:29px;flex:0 0 29px;border-radius:10px;display:grid;place-items:center;
+  background:#3a3027;color:#e3bb8c;font-weight:800;font-size:13px;margin-top:2px}
+.user-row .avatar{background:#3c3c3c;color:#eee;order:2}
+.message-body{max-width:min(78%,680px);min-width:0}
+.message-name{font-size:12px;color:#a5a5a5;margin:0 0 6px 2px}
 .user-row .message-name{text-align:right}
-
-.bubble{
-  font-size:15px;
-  line-height:1.72;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-}
-
-.bubble strong{
-  font-weight:750;
-  color:#fff;
-}
-
-/* Mathematical formatting */
-.bubble mjx-container[display="true"]{
-  margin:1em 0!important;
-  overflow-x:auto;
-  overflow-y:hidden;
-}
-
+.bubble{font-size:15px;line-height:1.72;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble strong{font-weight:750;color:#fff}
+.bubble mjx-container[display="true"]{margin:1em 0!important;overflow-x:auto;overflow-y:hidden}
 .bubble mjx-container{color:inherit}
-
-/* Animated typing cursor */
-.typing-cursor{
-  display:inline-block;
-  width:2px;
-  height:1em;
-  margin-left:2px;
-  vertical-align:-2px;
-  background:#d6a66f;
-  animation:cursorBlink .8s steps(2,start) infinite;
-}
-
-@keyframes cursorBlink{
-  to{visibility:hidden}
-}
-
-.user-row .bubble{
-  background:var(--user);
-  padding:11px 15px;
-  border-radius:19px;
-  line-height:1.6;
-}
-
+.typing-cursor{display:inline-block;width:2px;height:1em;margin-left:2px;
+  vertical-align:-2px;background:#d6a66f;animation:cursorBlink .8s steps(2,start) infinite}
+@keyframes cursorBlink{to{visibility:hidden}}
+.user-row .bubble{background:var(--user);padding:11px 15px;border-radius:19px;line-height:1.6}
 .bot-row .bubble{padding:1px 2px}
-
-.message-actions{
-  display:flex;
-  gap:5px;
-  margin-top:8px;
-}
-
-.mini-action{
-  border:0;
-  background:transparent;
-  color:#858585;
-  border-radius:7px;
-  padding:5px 7px;
-  font-size:12px;
-}
-
-.mini-action:hover{
-  background:#353535;
-  color:#eee;
-}
-
-/* Thinking animation */
-.typing{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  height:24px;
-}
-
-.typing i{
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:#aaa;
-  animation:pulse 1s infinite ease-in-out;
-}
-
-.typing i:nth-child(2){animation-delay:.15s}
-.typing i:nth-child(3){animation-delay:.3s}
-
-@keyframes pulse{
-  0%,80%,100%{
-    opacity:.35;
-    transform:translateY(0);
-  }
-  40%{
-    opacity:1;
-    transform:translateY(-4px);
-  }
-}
-
+.message-actions{display:flex;gap:5px;margin-top:8px}
+.mini-action{border:0;background:transparent;color:#858585;border-radius:7px;padding:5px 7px;font-size:12px}
+.mini-action:hover{background:#353535;color:#eee}
+.typing{display:flex;align-items:center;gap:5px;height:24px}
+.typing i{width:6px;height:6px;border-radius:50%;background:#aaa;animation:pulse 1s infinite ease-in-out}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes pulse{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
 .composer-wrap{padding:10px 20px 19px}
-
-.composer-area{
-  max-width:790px;
-  margin:0 auto;
-}
-
-.composer{
-  display:flex;
-  align-items:flex-end;
-  gap:10px;
-  padding:10px 11px 10px 17px;
-  border:1px solid #484848;
-  background:#2f2f2f;
-  border-radius:25px;
-  box-shadow:0 8px 28px #0002;
-}
-
+.composer-area{max-width:790px;margin:0 auto}
+.composer{display:flex;align-items:flex-end;gap:10px;padding:10px 11px 10px 17px;
+  border:1px solid #484848;background:#2f2f2f;border-radius:25px;
+  box-shadow:0 8px 28px #0002}
 .composer:focus-within{border-color:#696057}
-
-#userInput{
-  flex:1;
-  min-width:0;
-  max-height:180px;
-  resize:none;
-  outline:none;
-  border:0;
-  background:transparent;
-  color:#f2f2f2;
-  padding:7px 0;
-  font-size:15px;
-  line-height:1.5;
-}
-
+#userInput{flex:1;min-width:0;max-height:180px;resize:none;outline:none;border:0;background:transparent;
+  color:#f2f2f2;padding:7px 0;font-size:15px;line-height:1.5}
 #userInput::placeholder{color:#999}
-
-.send-btn{
-  width:37px;
-  height:37px;
-  flex:0 0 37px;
-  border:0;
-  border-radius:50%;
-  background:#e7e2db;
-  color:#25211c;
-  font-size:21px;
-  font-weight:700;
-  display:grid;
-  place-items:center;
-}
-
-.send-btn:hover{background:#fff}
-.send-btn:disabled{opacity:.4;cursor:not-allowed}
-
-.composer-hint{
-  text-align:center;
-  color:#858585;
-  font-size:11px;
-  margin-top:10px;
-}
-
-.toast{
-  position:absolute;
-  top:72px;
-  left:50%;
-  transform:translateX(-50%);
-  padding:9px 14px;
-  border:1px solid #494949;
-  border-radius:10px;
-  background:#303030;
-  color:#eee;
-  font-size:12px;
-  display:none;
-  z-index:5;
-}
-
+.send-btn{width:37px;height:37px;flex:0 0 37px;border:0;border-radius:50%;
+  background:#e7e2db;color:#25211c;font-size:21px;font-weight:700;display:grid;place-items:center}
+.send-btn:hover{background:#fff}.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.composer-hint{text-align:center;color:#858585;font-size:11px;margin-top:10px}
+.toast{position:absolute;top:72px;left:50%;transform:translateX(-50%);padding:9px 14px;
+  border:1px solid #494949;border-radius:10px;background:#303030;color:#eee;font-size:12px;
+  box-shadow:0 8px 25px #0005;display:none;z-index:5}
 .overlay{display:none}
-
 @media(max-width:700px){
-  .sidebar{
-    position:fixed;
-    z-index:10;
-    inset:0 auto 0 0;
-    transform:translateX(-100%);
-    box-shadow:15px 0 40px #0006;
-  }
-
+  .sidebar{position:fixed;z-index:10;inset:0 auto 0 0;transform:translateX(-100%);box-shadow:15px 0 40px #0006}
   .sidebar.open{transform:translateX(0)}
-
-  .overlay.show{
-    display:block;
-    position:fixed;
-    inset:0;
-    background:#0008;
-    z-index:9;
-  }
-
+  .overlay.show{display:block;position:fixed;inset:0;background:#0008;z-index:9}
   .mobile-menu{display:grid}
   .topbar{padding:0 13px}
+  .top-actions{gap:6px}
+  .model-select{max-width:185px;padding:7px 5px;font-size:11px}
+  .temp-pill{padding:7px 8px;font-size:10px}
   .chat-scroll{padding:23px 15px}
   .composer-wrap{padding:8px 12px 14px}
   .message-body{max-width:86%}
@@ -504,231 +139,157 @@ button{cursor:pointer}
 }
 </style>
 </head>
-
 <body>
 <div class="app">
-
   <aside class="sidebar" id="sidebar">
     <div class="brand-row">
-      <div class="brand">
-        <div class="brand-mark">B</div>
-        <span>Brownie AI</span>
-      </div>
-      <button class="icon-btn" onclick="closeSidebar()">‹</button>
+      <div class="brand"><div class="brand-mark">B</div><span>Brownie AI</span></div>
+      <button class="icon-btn" onclick="closeSidebar()" aria-label="Close sidebar">‹</button>
     </div>
-
-    <button class="side-btn primary" onclick="newChat()">
-      <span>＋</span> New chat
-    </button>
-
+    <button class="side-btn primary" onclick="newChat()"><span>＋</span> New chat</button>
     <div class="side-label">Your space</div>
-
-    <button class="side-btn" onclick="showTemporaryInfo()">
-      <span>◷</span> Temporary chat
-    </button>
-
-    <div class="side-note">
-      Temporary mode is on.<br>
-      Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.
-    </div>
+    <button class="side-btn" onclick="showTemporaryInfo()"><span>◷</span> Temporary chat</button>
+    <div class="side-note">Temporary mode is on.<br>Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.</div>
   </aside>
-
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
   <main class="main">
-
     <header class="topbar">
       <div class="top-left">
-        <button class="icon-btn mobile-menu" onclick="openSidebar()">☰</button>
-        <div class="top-title">Brownie AI</div>
+        <button class="icon-btn mobile-menu" onclick="openSidebar()" aria-label="Open menu">☰</button>
+        <div class="top-title">Brownie AI <span style="color:#888;font-weight:400">⌄</span></div>
       </div>
-
-      <div class="temp-pill">
-        <span class="temp-dot"></span>
-        Temporary chat
+      <div class="top-actions">
+        <select class="model-select" id="modelSelect" aria-label="Choose an AI model"
+          onchange="selectModel(this.value)">
+          <option value="brownie-lite">Brownie 4.2 Lite — Default</option>
+          <option value="brownie-standard">Brownie 4.8 Standard</option>
+          <option value="puppy-fast">Puppy 5.3 Fast</option>
+          <option value="mumu-reasoning">Mumu 6.1 Reasoning</option>
+          <option value="duck-creative">Duck 7.4 Creative</option>
+          <option value="benny-pro">Benny 8.2 Pro</option>
+          <option value="bunny-ultra">Bunny 9.6 Ultra</option>
+          <option value="jacky-code">Jacky 10.5 Code</option>
+          <option value="octapus-vision">Octapus 11.7 Vision</option>
+          <option value="bunty-research">Bunty 12.4 Research</option>
+          <option value="buddy-devotional">Buddy 13.8a Devotional</option>
+        </select>
+        <div class="temp-pill"><span class="temp-dot"></span> Temporary chat</div>
       </div>
     </header>
-
     <div class="toast" id="toast"></div>
-
     <section class="chat-scroll" id="chatScroll">
       <div class="chat-content" id="chatContent">
-
         <div class="welcome" id="welcome">
           <div class="welcome-mark">B</div>
-
           <h1>What can I help you <span>with?</span></h1>
-
           <p>Ask a question, explore an idea, or get something done.</p>
-
           <div class="suggestions">
-
-            <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')">
-              <strong>✦ Learn something</strong>
-              Explain a topic in simple words
-            </button>
-
-            <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')">
-              <strong>✧ Get creative</strong>
-              Brainstorm a project idea
-            </button>
-
-            <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')">
-              <strong>✎ Write something</strong>
-              Draft or improve a message
-            </button>
-
-            <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')">
-              <strong>⌘ Solve a problem</strong>
-              Work through a problem step by step
-            </button>
-
+            <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')"><strong>✦ Learn something</strong>Explain a topic in simple words</button>
+            <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')"><strong>✧ Get creative</strong>Brainstorm a project idea</button>
+            <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')"><strong>✎ Write something</strong>Draft or improve a message</button>
+            <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')"><strong>⌘ Solve a problem</strong>Work through a problem step by step</button>
           </div>
         </div>
-
       </div>
     </section>
-
     <div class="composer-wrap">
       <div class="composer-area">
-
         <div class="composer">
-          <textarea id="userInput" rows="1"
-            placeholder="Message Brownie AI..."
-            aria-label="Message Brownie AI"></textarea>
-
-          <button class="send-btn" id="sendBtn"
-            onclick="sendMessage()">↑</button>
+          <textarea id="userInput" rows="1" placeholder="Message Brownie AI..." aria-label="Message Brownie AI"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">↑</button>
         </div>
-
-        <div class="composer-hint">
-          Brownie AI can make mistakes. Check important information.
-        </div>
-
+        <div class="composer-hint">Brownie AI can make mistakes. Check important information.</div>
       </div>
     </div>
-
   </main>
 </div>
-
 <script>
 const chatContent = document.getElementById("chatContent");
 const chatScroll = document.getElementById("chatScroll");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
-
 let history = [];
 let busy = false;
 
-function scrollToBottom(){
-  chatScroll.scrollTop = chatScroll.scrollHeight;
+let shouldAutoScroll = true;
+
+function scrollToBottom(force = false){
+  if(force || shouldAutoScroll){
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+  }
 }
 
+chatScroll.addEventListener("scroll", () => {
+  const distanceFromBottom =
+    chatScroll.scrollHeight - chatScroll.scrollTop - chatScroll.clientHeight;
+  shouldAutoScroll = distanceFromBottom < 70;
+});
+
 function showToast(message){
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.style.display = "block";
+  const toast=document.getElementById("toast");
+  toast.textContent=message;toast.style.display="block";
+  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.style.display="none",2600);
+}
 
-  clearTimeout(showToast.timer);
+const modelDetails = {
+  "brownie-lite": {name:"Brownie 4.2 Lite", purpose:"Everyday questions"},
+  "brownie-standard": {name:"Brownie 4.8 Standard", purpose:"General-purpose AI"},
+  "puppy-fast": {name:"Puppy 5.3 Fast", purpose:"Quick responses"},
+  "mumu-reasoning": {name:"Mumu 6.1 Reasoning", purpose:"Complex problem-solving"},
+  "duck-creative": {name:"Duck 7.4 Creative", purpose:"Creative writing and ideas"},
+  "benny-pro": {name:"Benny 8.2 Pro", purpose:"Advanced assistance"},
+  "bunny-ultra": {name:"Bunny 9.6 Ultra", purpose:"Advanced reasoning and analysis"},
+  "jacky-code": {name:"Jacky 10.5 Code", purpose:"Programming and debugging"},
+  "octapus-vision": {name:"Octapus 11.7 Vision", purpose:"Image understanding"},
+  "bunty-research": {name:"Bunty 12.4 Research", purpose:"Detailed research and explanations"},
+  "buddy-devotional": {name:"Buddy 13.8a Devotional", purpose:"Devotional topics and reflective content"}
+};
 
-  showToast.timer = setTimeout(() => {
-    toast.style.display = "none";
-  }, 2600);
+function selectModel(value){
+  const selected = modelDetails[value];
+  if(!selected) return;
+  showToast(selected.name + " selected — " + selected.purpose + ". All options currently use the same Gemini backend.");
 }
 
 function showTemporaryInfo(){
   showToast("Temporary chat: messages are not saved and disappear when you refresh or start a new chat.");
 }
-
-function openSidebar(){
-  document.getElementById("sidebar").classList.add("open");
-  document.getElementById("overlay").classList.add("show");
-}
-
-function closeSidebar(){
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("overlay").classList.remove("show");
-}
-
-function useSuggestion(text){
-  input.value = text;
-  resizeInput();
-  input.focus();
-}
+function openSidebar(){document.getElementById("sidebar").classList.add("open");document.getElementById("overlay").classList.add("show");}
+function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
+function useSuggestion(text){input.value=text;resizeInput();input.focus();}
 
 function addMessage(text, role, loading=false){
-  const row = document.createElement("div");
-  row.className = "message-row " +
-    (role === "user" ? "user-row" : "bot-row");
-
-  const avatar = document.createElement("div");
-  avatar.className = "avatar";
-  avatar.textContent = role === "user" ? "Y" : "B";
-
-  const body = document.createElement("div");
-  body.className = "message-body";
-
-  const name = document.createElement("div");
-  name.className = "message-name";
-  name.textContent = role === "user" ? "You" : "Brownie AI";
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-
+  const row=document.createElement("div");
+  row.className="message-row "+(role==="user"?"user-row":"bot-row");
+  const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=role==="user"?"Y":"B";
+  const body=document.createElement("div");body.className="message-body";
+  const name=document.createElement("div");name.className="message-name";name.textContent=role==="user"?"You":"Brownie AI";
+  const bubble=document.createElement("div");bubble.className="bubble";
   if(loading){
-    bubble.innerHTML =
-      '<span class="typing"><i></i><i></i><i></i></span>';
-  }else{
-    bubble.textContent = text;
-  }
-
-  body.append(name, bubble);
-
-  if(role === "user"){
-    row.append(body, avatar);
-  }else{
-    row.append(avatar, body);
-  }
-
-  chatContent.appendChild(row);
-  scrollToBottom();
-
-  return {row, bubble};
+    bubble.innerHTML='<span class="typing" aria-label="Brownie AI is thinking"><i></i><i></i><i></i></span>';
+  }else{bubble.textContent=text;}
+  body.append(name,bubble);
+  if(role==="user")row.append(body,avatar);else row.append(avatar,body);
+  chatContent.appendChild(row);scrollToBottom();
+  return {row,bubble};
 }
 
 function addCopyButton(messageBody, text){
-  const actions = document.createElement("div");
-  actions.className = "message-actions";
-
-  const copy = document.createElement("button");
-  copy.className = "mini-action";
-  copy.textContent = "Copy";
-
-  copy.onclick = async () => {
-    try{
-      await navigator.clipboard.writeText(text);
-      copy.textContent = "Copied";
-
-      setTimeout(() => {
-        copy.textContent = "Copy";
-      }, 1200);
-    }catch{
-      showToast("Copy is not available in this browser.");
-    }
+  const actions=document.createElement("div");actions.className="message-actions";
+  const copy=document.createElement("button");copy.className="mini-action";copy.textContent="Copy";
+  copy.onclick=async()=>{
+    try{await navigator.clipboard.writeText(text);copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy",1200);}
+    catch{showToast("Copy is not available in this browser.");}
   };
-
-  actions.appendChild(copy);
-  messageBody.appendChild(actions);
+  actions.appendChild(copy);messageBody.appendChild(actions);
 }
 
 function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Safely display normal text and **bold** phrases.
 function appendFormattedToken(container, token){
   const match = token.match(/^\*\*([\s\S]+)\*\*$/);
-
   if(match){
     const strong = document.createElement("strong");
     strong.textContent = match[1];
@@ -738,10 +299,8 @@ function appendFormattedToken(container, token){
   }
 }
 
-// Reveal the reply gradually, like an assistant typing.
 async function revealReply(bubble, text){
   bubble.textContent = "";
-
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   bubble.appendChild(cursor);
@@ -753,63 +312,47 @@ async function revealReply(bubble, text){
     appendFormattedToken(part, token);
     bubble.insertBefore(part, cursor);
     scrollToBottom();
-
-    await sleep(token.trim() ? 55 : 18);
+    await sleep(token.trim() ? 22 : 5);
   }
 
   cursor.remove();
   await typesetReply(bubble, text);
 }
 
-// Escape HTML so model responses cannot inject arbitrary markup.
 function escapeHtml(value){
   return value.replace(/[&<>"']/g, ch => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[ch]);
 }
 
-// Preserve Markdown bold while keeping LaTeX notation intact.
 function formatReplyHtml(text){
   let safe = escapeHtml(text);
-
-  safe = safe.replace(
-    /\*\*([\s\S]+?)\*\*/g,
-    "<strong>$1</strong>"
-  );
-
+  safe = safe.replace(/\*\*([\s\S]+?)\*\*/g, "<strong>$1</strong>");
   return safe;
 }
 
-// Render all supported MathJax expressions in the reply.
 async function typesetReply(bubble, text){
   bubble.innerHTML = formatReplyHtml(text);
 
-  try{
-    if(!window.MathJax || !window.MathJax.typesetPromise){
+  try {
+    if (!window.MathJax || !window.MathJax.typesetPromise) {
       const mathScript = document.getElementById("mathjax-script");
-
-      if(mathScript){
+      if (mathScript) {
         await new Promise(resolve => {
-          mathScript.addEventListener("load", resolve, {once:true});
-          mathScript.addEventListener("error", resolve, {once:true});
+          mathScript.addEventListener("load", resolve, { once:true });
+          mathScript.addEventListener("error", resolve, { once:true });
         });
       }
     }
 
-    if(window.MathJax && window.MathJax.startup &&
-       window.MathJax.startup.promise){
+    if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
       await window.MathJax.startup.promise;
     }
 
-    if(window.MathJax && window.MathJax.typesetPromise){
+    if (window.MathJax && window.MathJax.typesetPromise) {
       await window.MathJax.typesetPromise([bubble]);
     }
-
-  }catch(error){
+  } catch(error) {
     console.error("Math rendering error:", error);
   }
 
@@ -817,146 +360,61 @@ async function typesetReply(bubble, text){
 }
 
 async function sendMessage(){
+  const message=input.value.trim();
+  if(!message||busy)return;
+  const welcome=document.getElementById("welcome");if(welcome)welcome.remove();
+  input.value="";resizeInput();busy=true;sendBtn.disabled=true;
+  shouldAutoScroll = true;
+  addMessage(message,"user");
+  const loading=addMessage("","bot",true);
 
-  const message = input.value.trim();
-
-  if(!message || busy) return;
-
-  const welcome = document.getElementById("welcome");
-
-  if(welcome) welcome.remove();
-
-  input.value = "";
-  resizeInput();
-
-  busy = true;
-  sendBtn.disabled = true;
-
-  addMessage(message, "user");
-
-  const loading = addMessage("", "bot", true);
-
-  const requestText = [...history, {
-    role:"user",
-    content:message
-  }]
-  .map(item =>
-    (item.role === "user" ? "User" : "Brownie AI")
-    + ":\n" + item.content
-  )
-  .join("\n\n");
+  const requestText=[...history,{role:"user",content:message}]
+    .map(item=>(item.role==="user"?"User":"Brownie AI")+":\n"+item.content).join("\n\n");
 
   try{
-
-    const response = await fetch("/chat", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        message:requestText
-      })
+    const response=await fetch("/chat",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:requestText})
     });
-
-    const data = await response.json();
-
-    if(!response.ok){
-      throw new Error(data.error || "The server returned an error.");
-    }
-
-    const reply = data.reply ||
-      "I couldn't generate a response. Please try again.";
-
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.error||"The server returned an error.");
+    const reply=data.reply||"I couldn't generate a response. Please try again.";
     await revealReply(loading.bubble, reply);
-
-    history.push(
-      {role:"user", content:message},
-      {role:"assistant", content:reply}
-    );
-
-    addCopyButton(
-      loading.row.querySelector(".message-body"),
-      reply
-    );
-
+    history.push({role:"user",content:message},{role:"assistant",content:reply});
+    addCopyButton(loading.row.querySelector(".message-body"),reply);
   }catch(error){
-
-    loading.bubble.textContent =
-      "Sorry, something went wrong: " + error.message;
-
+    loading.bubble.textContent="Sorry, something went wrong: "+error.message;
   }finally{
-
-    busy = false;
-    sendBtn.disabled = false;
-    input.focus();
-    scrollToBottom();
-
+    busy=false;sendBtn.disabled=false;input.focus();scrollToBottom();
   }
 }
 
 function newChat(){
-
-  if(busy){
-    showToast("Please wait for the current response to finish.");
-    return;
-  }
-
-  history = [];
-
-  chatContent.innerHTML = `
+  if(busy){showToast("Please wait for the current response to finish.");return;}
+  history=[];
+  chatContent.innerHTML=`
     <div class="welcome" id="welcome">
       <div class="welcome-mark">B</div>
       <h1>What can I help you <span>with?</span></h1>
       <p>Ask a question, explore an idea, or get something done.</p>
-
       <div class="suggestions">
-
-        <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')">
-          <strong>✦ Learn something</strong>
-          Explain a topic in simple words
-        </button>
-
-        <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')">
-          <strong>✧ Get creative</strong>
-          Brainstorm a project idea
-        </button>
-
-        <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')">
-          <strong>✎ Write something</strong>
-          Draft or improve a message
-        </button>
-
-        <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')">
-          <strong>⌘ Solve a problem</strong>
-          Work through a problem step by step
-        </button>
-
+        <button class="suggestion" onclick="useSuggestion('Explain a difficult topic in simple words.')"><strong>✦ Learn something</strong>Explain a topic in simple words</button>
+        <button class="suggestion" onclick="useSuggestion('Help me brainstorm a creative project idea.')"><strong>✧ Get creative</strong>Brainstorm a project idea</button>
+        <button class="suggestion" onclick="useSuggestion('Help me write a clear and polished message.')"><strong>✎ Write something</strong>Draft or improve a message</button>
+        <button class="suggestion" onclick="useSuggestion('Help me solve this problem step by step.')"><strong>⌘ Solve a problem</strong>Work through a problem step by step</button>
       </div>
-    </div>
-  `;
-
-  input.value = "";
-  resizeInput();
-  closeSidebar();
-
-  showToast("New temporary chat started.");
+    </div>`;
+  input.value="";resizeInput();closeSidebar();showToast("New temporary chat started.");
 }
 
 function resizeInput(){
-  input.style.height = "auto";
-  input.style.height =
-    Math.min(input.scrollHeight,180) + "px";
+  input.style.height="auto";
+  input.style.height=Math.min(input.scrollHeight,180)+"px";
 }
-
-input.addEventListener("input", resizeInput);
-
-input.addEventListener("keydown", event => {
-  if(event.key === "Enter" && !event.shiftKey){
-    event.preventDefault();
-    sendMessage();
-  }
+input.addEventListener("input",resizeInput);
+input.addEventListener("keydown",event=>{
+  if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();sendMessage();}
 });
 </script>
-
 </body>
 </html>
