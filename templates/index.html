@@ -93,6 +93,14 @@ button{cursor:pointer}
 .model-select{background:var(--bg-surface-alt);color:var(--text-main);border:1px solid var(--border-color);border-radius:var(--radius-md);
   padding:9px 30px 9px 12px;font-size:12px;outline:none;max-width:265px;transition:var(--transition-smooth)}
 .model-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-focus)}
+.model-status{display:inline-flex;align-items:center;gap:6px;max-width:190px;padding:7px 9px;border:1px solid var(--border-color);border-radius:var(--radius-full);background:var(--bg-surface-alt);color:var(--text-subtle);font-size:10px;font-weight:800;letter-spacing:.25px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-status::before{content:"";width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--text-subtle)}
+.model-status.available{color:var(--success);border-color:rgba(56,161,105,.3);background:rgba(56,161,105,.07)}
+.model-status.available::before{background:var(--success)}
+.model-status.checking{color:var(--warning);border-color:rgba(221,107,32,.3);background:rgba(221,107,32,.07)}
+.model-status.checking::before{background:var(--warning)}
+.model-status.unavailable{color:var(--danger);border-color:rgba(229,62,62,.35);background:var(--accent-soft)}
+.model-status.unavailable::before{background:var(--danger)}
 .top-actions{display:flex;align-items:center;gap:10px}
 .temp-pill{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-full);
   color:var(--accent);font-size:12px;font-weight:700;background:var(--accent-soft);white-space:nowrap}
@@ -187,7 +195,7 @@ body.night-theme .settings-card{background:var(--bg-surface)}
 @media(max-width:760px){
   .topbar{padding:0 14px;height:64px;flex-basis:64px}
   .top-left{gap:8px}.top-title{font-size:15px}
-  .top-actions{gap:5px}.model-select{max-width:155px;padding:8px 5px;font-size:10px}
+  .top-actions{gap:5px}.model-select{max-width:155px;padding:8px 5px;font-size:10px}.model-status{max-width:118px;padding:6px 7px;font-size:9px}
   .temp-pill{padding:7px 8px;font-size:10px}
   .chat-scroll{padding:20px 12px}
   .composer-wrap{padding:9px 10px 13px}
@@ -198,13 +206,14 @@ body.night-theme .settings-card{background:var(--bg-surface)}
 }
 @media(max-width:430px){
   .temp-pill{display:none}
-  .model-select{max-width:145px}
+  .model-select{max-width:145px}.model-status{max-width:95px;font-size:8px;letter-spacing:0;padding:6px}
   .composer{gap:5px;padding:8px}
   .tool-btn{width:34px;height:36px;flex-basis:34px}
   .send-btn{width:36px;height:36px;flex-basis:36px}
 }
 </style>
 </head>
+
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
@@ -224,9 +233,10 @@ body.night-theme .settings-card{background:var(--bg-surface)}
       </div>
       <button class="icon-btn" onclick="closeSidebar()" aria-label="Close sidebar">‹</button>
     </div>
-    <button class="side-btn primary" onclick="newChat()"><span>＋</span> New chat</button>
+
+    <button class="side-btn primary" onclick="newChat()">＋ New chat</button>
     <div class="side-label">Your space</div>
-    <button class="side-btn" onclick="showTemporaryInfo()"><span>◷</span> Temporary chat</button>
+    <button class="side-btn" onclick="showTemporaryInfo()">◷ Temporary chat</button>
     <div class="side-note">Temporary mode is on.<br>Your conversation stays in this tab and is cleared when you start a new chat or refresh the page.</div>
   </aside>
 
@@ -238,10 +248,12 @@ body.night-theme .settings-card{background:var(--bg-surface)}
         <button class="icon-btn mobile-menu" onclick="openSidebar()" aria-label="Open menu">☰</button>
         <div class="top-title">ROSE AI <span style="color:#888;font-weight:400">⌄</span></div>
       </div>
+
       <div class="top-actions">
-        <select class="model-select" id="modelSelect" aria-label="Choose an available Gemini model" title="Models available to your Gemini API key">
-          <option value="">Loading Gemini models...</option>
+        <select class="model-select" id="modelSelect" aria-label="Choose an available AI model" title="Models available to your API key">
+          <option value="">Loading models...</option>
         </select>
+        <span class="model-status checking" id="modelStatus" role="status" aria-live="polite">CHECKING</span>
         <button class="icon-btn" onclick="openSettings()" title="Appearance settings" aria-label="Appearance settings">⚙</button>
         <div class="temp-pill"><span class="temp-dot"></span> Temporary chat</div>
       </div>
@@ -333,14 +345,12 @@ let recognition = null;
 let currentlySpeakingButton = null;
 let availableGeminiModels = [];
 let selectedGeminiModel = "";
+let modelIsUnavailable = false;
+let shouldAutoScroll = true;
 
 if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 }
-
-let shouldAutoScroll = true;
-
-loadGeminiModels();
 
 function scrollToBottom(force = false){
   if(force || shouldAutoScroll){
@@ -359,7 +369,7 @@ function showToast(message){
   toast.textContent=message;
   toast.style.display="block";
   clearTimeout(showToast.timer);
-  showToast.timer=setTimeout(()=>toast.style.display="none",2600);
+  showToast.timer=setTimeout(()=>toast.style.display="none",3000);
 }
 
 // Appearance settings
@@ -371,7 +381,9 @@ function closeSettings(){
 }
 function setTheme(choice){
   const hour = new Date().getHours();
-  const isDark = choice === "dark" || (choice === "time-based" && (hour >= 16 || hour < 4));
+  const isDark = choice === "dark" ||
+    (choice === "time-based" && (hour >= 16 || hour < 4));
+
   document.body.classList.toggle("night-theme", isDark);
   document.documentElement.style.colorScheme = isDark ? "dark" : "light";
   localStorage.setItem("rose_theme_pref", choice);
@@ -379,11 +391,12 @@ function setTheme(choice){
 function setAccent(color){
   const root=document.documentElement;
   root.style.setProperty("--accent", color);
-  root.style.setProperty("--accent-hover", color);
-  root.style.setProperty("--accent-soft", color+"22");
-  root.style.setProperty("--accent-border", color+"88");
+
   const hex=color.replace("#","");
-  const rgb=hex.length===6?`${parseInt(hex.slice(0,2),16)}, ${parseInt(hex.slice(2,4),16)}, ${parseInt(hex.slice(4,6),16)}`:"229, 62, 62";
+  const rgb=hex.length===6
+    ? `${parseInt(hex.slice(0,2),16)}, ${parseInt(hex.slice(2,4),16)}, ${parseInt(hex.slice(4,6),16)}`
+    : "229, 62, 62";
+
   root.style.setProperty("--accent-glow",`rgba(${rgb}, .22)`);
   root.style.setProperty("--accent-soft",`rgba(${rgb}, .08)`);
   root.style.setProperty("--accent-border",`rgba(${rgb}, .28)`);
@@ -392,8 +405,10 @@ function setAccent(color){
 (function loadAppearance(){
   const savedTheme=localStorage.getItem("rose_theme_pref")||"time-based";
   const savedAccent=localStorage.getItem("rose-accent")||"#e53e3e";
+
   document.getElementById("themeSelect").value=savedTheme;
   document.getElementById("accentSelect").value=savedAccent;
+
   setTheme(savedTheme);
   setAccent(savedAccent);
 })();
@@ -401,42 +416,55 @@ function setAccent(color){
 // Voice input
 function toggleVoiceInput(){
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
   if(!SpeechRecognition){
     showToast("Voice input is not supported in this browser. Try Chrome or Edge.");
     return;
   }
+
   if(recognition){
     recognition.stop();
     recognition=null;
     document.getElementById("micBtn").classList.remove("active");
     return;
   }
+
   recognition=new SpeechRecognition();
   recognition.lang=navigator.language||"en-IN";
   recognition.interimResults=true;
   recognition.continuous=false;
+
   const mic=document.getElementById("micBtn");
   mic.classList.add("active");
+
   recognition.onresult=(event)=>{
     let finalText="", interimText="";
+
     for(let i=event.resultIndex;i<event.results.length;i++){
       if(event.results[i].isFinal)finalText+=event.results[i][0].transcript;
       else interimText+=event.results[i][0].transcript;
     }
+
     if(finalText){
       input.value=(input.value?input.value+" ":"")+finalText;
       resizeInput();
     }
+
     mic.title=interimText?"Hearing: "+interimText:"Voice input";
   };
+
   recognition.onerror=(event)=>{
-    showToast(event.error==="not-allowed"?"Please allow microphone access in your browser.":"Voice input stopped: "+event.error);
+    showToast(event.error==="not-allowed"
+      ? "Please allow microphone access in your browser."
+      : "Voice input stopped: "+event.error);
   };
+
   recognition.onend=()=>{
     recognition=null;
     mic.classList.remove("active");
     mic.title="Voice input";
   };
+
   try{
     recognition.start();
     showToast("Listening... speak now.");
@@ -453,25 +481,34 @@ function readAloud(text, button){
     showToast("Read aloud is not supported in this browser.");
     return;
   }
+
   if(window.speechSynthesis.speaking && currentlySpeakingButton===button){
     window.speechSynthesis.cancel();
     button.classList.remove("speaking");
     currentlySpeakingButton=null;
     return;
   }
+
   window.speechSynthesis.cancel();
-  if(currentlySpeakingButton)currentlySpeakingButton.classList.remove("speaking");
+
+  if(currentlySpeakingButton){
+    currentlySpeakingButton.classList.remove("speaking");
+  }
+
   const utterance=new SpeechSynthesisUtterance(text);
   utterance.rate=1;
   utterance.pitch=1;
+
   utterance.onend=()=>{
     button.classList.remove("speaking");
     currentlySpeakingButton=null;
   };
+
   utterance.onerror=()=>{
     button.classList.remove("speaking");
     currentlySpeakingButton=null;
   };
+
   button.classList.add("speaking");
   currentlySpeakingButton=button;
   window.speechSynthesis.speak(utterance);
@@ -479,13 +516,18 @@ function readAloud(text, button){
 
 // Document upload
 const fileInput=document.getElementById("fileInput");
+
 fileInput.addEventListener("change",()=>{
   const incoming=Array.from(fileInput.files||[]);
+
   for(const file of incoming){
-    if(!selectedFiles.some(existing=>existing.name===file.name&&existing.size===file.size)){
+    if(!selectedFiles.some(existing =>
+      existing.name===file.name && existing.size===file.size
+    )){
       selectedFiles.push(file);
     }
   }
+
   renderAttachments();
   fileInput.value="";
 });
@@ -493,19 +535,24 @@ fileInput.addEventListener("change",()=>{
 function renderAttachments(){
   const area=document.getElementById("attachments");
   area.innerHTML="";
+
   selectedFiles.forEach((file,index)=>{
     const chip=document.createElement("div");
     chip.className="file-chip";
+
     const label=document.createElement("span");
     label.textContent="📄 "+file.name;
+
     const remove=document.createElement("button");
     remove.type="button";
     remove.textContent="×";
     remove.title="Remove file";
+
     remove.onclick=()=>{
       selectedFiles.splice(index,1);
       renderAttachments();
     };
+
     chip.append(label,remove);
     area.appendChild(chip);
   });
@@ -513,67 +560,164 @@ function renderAttachments(){
 
 async function extractDocumentText(file){
   const ext=file.name.split(".").pop().toLowerCase();
+
   if(file.size>15*1024*1024){
     throw new Error(file.name+" is larger than 15 MB. Please use a smaller file.");
   }
+
   if(ext==="txt")return await file.text();
+
   if(ext==="docx"){
-    if(!window.mammoth)throw new Error("DOCX reader could not load. Check your internet connection.");
+    if(!window.mammoth){
+      throw new Error("DOCX reader could not load. Check your internet connection.");
+    }
+
     const arrayBuffer=await file.arrayBuffer();
     const result=await mammoth.extractRawText({arrayBuffer});
     return result.value;
   }
+
   if(ext==="pdf"){
-    if(!window.pdfjsLib)throw new Error("PDF reader could not load. Check your internet connection.");
+    if(!window.pdfjsLib){
+      throw new Error("PDF reader could not load. Check your internet connection.");
+    }
+
     const data=new Uint8Array(await file.arrayBuffer());
     const pdf=await pdfjsLib.getDocument({data}).promise;
     let pages=[];
     const maxPages=Math.min(pdf.numPages,100);
+
     for(let pageNo=1;pageNo<=maxPages;pageNo++){
       const page=await pdf.getPage(pageNo);
       const content=await page.getTextContent();
       pages.push(content.items.map(item=>item.str).join(" "));
     }
-    if(pdf.numPages>maxPages)pages.push("[Only the first 100 pages were extracted.]");
+
+    if(pdf.numPages>maxPages){
+      pages.push("[Only the first 100 pages were extracted.]");
+    }
+
     return pages.join("\n\n");
   }
+
   throw new Error("Unsupported file type: "+file.name+". Upload PDF, DOCX or TXT.");
 }
 
-// Load the actual Gemini models available to your API key.
+// Gemini model categories
+function modelCategory(modelName){
+  const name=(modelName||"").toLowerCase();
+
+  if(name.includes("deep-research")) return "RESEARCH";
+  if(name.includes("antigravity") || name.includes("preview") || name.includes("omni")) return "PREVIEW";
+  if(name.includes("gemma")) return "GEMMA";
+  if(name.includes("image") || name.includes("nano-banana")) return "IMAGE";
+  if(name.includes("pro") || name.includes("argon") || name.includes("carbon") || name.includes("hydrogen")) return "PRO";
+  if(name.includes("lite")) return "LITE";
+  if(name.includes("flash")) return "FLASH";
+
+  return "GEMINI";
+}
+
+function setModelStatus(state, message){
+  const badge=document.getElementById("modelStatus");
+  if(!badge)return;
+
+  badge.className="model-status "+state;
+  badge.textContent=message;
+  modelIsUnavailable=state==="unavailable";
+}
+
+async function readJsonResponse(response){
+  const raw=await response.text();
+  let data;
+
+  try{
+    data=JSON.parse(raw);
+  }catch(_){
+    throw new Error("UNAVAILABLE NOW TRY LATER");
+  }
+
+  if(!response.ok){
+    const error=new Error(data.error||"UNAVAILABLE NOW TRY LATER");
+    error.status=response.status;
+    error.unavailable=data.unavailable===true ||
+      [429,502,503,504].includes(response.status);
+    throw error;
+  }
+
+  return data;
+}
+
+// Fetch the actual models available to this API key.
 async function loadGeminiModels(){
   const select=document.getElementById("modelSelect");
-  select.innerHTML='<option value="">Loading Gemini models...</option>';
+  select.innerHTML='<option value="">Loading models...</option>';
+
+  setModelStatus("checking","CHECKING MODELS");
+
   try{
-    const response=await fetch("/models",{headers:{"Accept":"application/json"}});
-    const data=await response.json();
-    if(!response.ok)throw new Error(data.error||"Could not load Gemini models.");
+    const response=await fetch("/models",{
+      headers:{"Accept":"application/json"},
+      cache:"no-store"
+    });
+
+    const data=await readJsonResponse(response);
     availableGeminiModels=Array.isArray(data.models)?data.models:[];
+
     select.innerHTML="";
+
     if(!availableGeminiModels.length){
-      select.innerHTML='<option value="">No Gemini models available</option>';
-      showToast("No Gemini models supporting text generation were returned for this API key.");
+      select.innerHTML='<option value="">No models available</option>';
+      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+      showToast("No models supporting generateContent were found for this API key.");
       return;
     }
-    availableGeminiModels.forEach(model=>{
+
+    const groups=["GEMINI","FLASH","LITE","PRO","IMAGE","GEMMA","RESEARCH","PREVIEW"];
+
+    const sorted=[...availableGeminiModels].sort((a,b)=>{
+      const ca=modelCategory(a.name);
+      const cb=modelCategory(b.name);
+      return groups.indexOf(ca)-groups.indexOf(cb) || a.name.localeCompare(b.name);
+    });
+
+    sorted.forEach(model=>{
       const option=document.createElement("option");
       option.value=model.name;
-      option.textContent=model.display_name||model.name;
+
+      const label=model.display_name||model.name;
+      option.textContent=label+" · "+modelCategory(model.name);
+
       select.appendChild(option);
     });
-    const preferred=availableGeminiModels.find(m=>m.name==="gemini-3.5-flash-lite")||availableGeminiModels[0];
+
+    const preferred=availableGeminiModels.find(m=>m.name==="gemini-3.5-flash-lite")
+      ||availableGeminiModels.find(m=>m.name==="gemini-2.5-flash")
+      ||availableGeminiModels[0];
+
     select.value=preferred.name;
     selectedGeminiModel=preferred.name;
+
+    setModelStatus("available","API LISTED · CHECKED ON SEND");
+
   }catch(error){
-    select.innerHTML='<option value="">Gemini models unavailable</option>';
-    showToast("Could not load models: "+error.message);
+    select.innerHTML='<option value="">Models unavailable</option>';
+    setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+    showToast("UNAVAILABLE NOW TRY LATER");
   }
 }
 
 document.getElementById("modelSelect").addEventListener("change",event=>{
   selectedGeminiModel=event.target.value;
+
   const chosen=availableGeminiModels.find(model=>model.name===selectedGeminiModel);
-  if(chosen)showToast((chosen.display_name||chosen.name)+" selected.");
+
+  if(chosen){
+    setModelStatus("available","API LISTED · CHECKED ON SEND");
+    showToast((chosen.display_name||chosen.name)+" selected · "+modelCategory(chosen.name));
+  }else{
+    setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+  }
 });
 
 function showTemporaryInfo(){
@@ -596,6 +740,7 @@ function useSuggestion(text){
 function addMessage(text, role, loading=false){
   const row=document.createElement("div");
   row.className="message-row "+(role==="user"?"user-row":"bot-row");
+
   const avatar=document.createElement("div");
   avatar.className="avatar";
 
@@ -607,9 +752,11 @@ function addMessage(text, role, loading=false){
 
   const body=document.createElement("div");
   body.className="message-body";
+
   const name=document.createElement("div");
   name.className="message-name";
   name.textContent=role==="user"?"You":"ROSE AI";
+
   const bubble=document.createElement("div");
   bubble.className="bubble";
 
@@ -620,19 +767,24 @@ function addMessage(text, role, loading=false){
   }
 
   body.append(name,bubble);
+
   if(role==="user")row.append(body,avatar);
   else row.append(avatar,body);
+
   chatContent.appendChild(row);
   scrollToBottom();
+
   return {row,bubble};
 }
 
 function addCopyButton(messageBody, text){
   const actions=document.createElement("div");
   actions.className="message-actions";
+
   const copy=document.createElement("button");
   copy.className="mini-action";
   copy.textContent="Copy";
+
   copy.onclick=async()=>{
     try{
       await navigator.clipboard.writeText(text);
@@ -647,6 +799,7 @@ function addCopyButton(messageBody, text){
   speak.className="mini-action read-btn";
   speak.textContent="🔊 Read aloud";
   speak.onclick=()=>readAloud(text,speak);
+
   actions.append(copy,speak);
   messageBody.appendChild(actions);
 }
@@ -657,6 +810,7 @@ function sleep(ms){
 
 function appendFormattedToken(container, token){
   const match = token.match(/^\*\*([\s\S]+)\*\*$/);
+
   if(match){
     const strong = document.createElement("strong");
     strong.textContent = match[1];
@@ -668,6 +822,7 @@ function appendFormattedToken(container, token){
 
 async function revealReply(bubble, text){
   bubble.textContent = "";
+
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   bubble.appendChild(cursor);
@@ -700,6 +855,7 @@ function formatReplyHtml(text){
 
 async function typesetReply(bubble, text){
   bubble.innerHTML = formatReplyHtml(text);
+
   try {
     if (!window.MathJax || !window.MathJax.typesetPromise) {
       const mathScript = document.getElementById("mathjax-script");
@@ -710,20 +866,24 @@ async function typesetReply(bubble, text){
         });
       }
     }
+
     if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
       await window.MathJax.startup.promise;
     }
+
     if (window.MathJax && window.MathJax.typesetPromise) {
       await window.MathJax.typesetPromise([bubble]);
     }
   } catch(error) {
     console.error("Math rendering error:", error);
   }
+
   scrollToBottom();
 }
 
 async function sendMessage(){
   const question=input.value.trim();
+
   if((!question&&selectedFiles.length===0)||busy)return;
 
   const welcome=document.getElementById("welcome");
@@ -742,45 +902,113 @@ async function sendMessage(){
   const filesToSend=[...selectedFiles];
   selectedFiles=[];
   renderAttachments();
+
   input.value="";
   resizeInput();
 
   const visibleQuestion=question||(filesToSend.length?"Please analyse the attached document(s).":"");
-  addMessage(visibleQuestion+(filesToSend.length?"\n\n📎 "+filesToSend.map(f=>f.name).join(", "):""),"user");
+
+  addMessage(
+    visibleQuestion+(filesToSend.length?"\n\n📎 "+filesToSend.map(f=>f.name).join(", "):""),
+    "user"
+  );
+
   const loading=addMessage("","bot",true);
 
   try{
     let documentContext="";
+
     if(filesToSend.length){
       showToast("Reading your document(s)...");
+
       for(const file of filesToSend){
         const extracted=await extractDocumentText(file);
-        if(!extracted.trim())throw new Error(file.name+" contains no extractable text. Scanned PDFs may need OCR first.");
+
+        if(!extracted.trim()){
+          throw new Error(file.name+" contains no extractable text. Scanned PDFs may need OCR first.");
+        }
+
         documentContext+="\n\n--- DOCUMENT: "+file.name+" ---\n"+extracted.slice(0,60000);
       }
     }
 
-    const currentUserContent=visibleQuestion+(documentContext?"\n\nAttached document content:"+documentContext:"");
+    const currentUserContent=visibleQuestion+
+      (documentContext?"\n\nAttached document content:"+documentContext:"");
+
     const requestText=[...history,{role:"user",content:currentUserContent}]
-      .map(item=>(item.role==="user"?"User":"ROSE AI")+":\n"+item.content).join("\n\n");
+      .map(item=>(item.role==="user"?"User":"ROSE AI")+":\n"+item.content)
+      .join("\n\n");
+
+    if(!selectedGeminiModel){
+      throw new Error("UNAVAILABLE NOW TRY LATER");
+    }
+
+    // Refresh the available-model list before sending.
+    setModelStatus("checking","CHECKING MODEL");
+
+    const modelCheckResponse=await fetch("/models?refresh=1",{
+      headers:{"Accept":"application/json"},
+      cache:"no-store"
+    });
+
+    const modelCheck=await readJsonResponse(modelCheckResponse);
+
+    const currentlyListed=Array.isArray(modelCheck.models) &&
+      modelCheck.models.some(model=>model.name===selectedGeminiModel);
+
+    if(!currentlyListed){
+      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+      throw new Error("UNAVAILABLE NOW TRY LATER");
+    }
+
+    setModelStatus("checking","MODEL BUSY? CHECKING");
 
     const response=await fetch("/chat",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({message:requestText,model:selectedGeminiModel})
+      headers:{
+        "Content-Type":"application/json",
+        "Accept":"application/json"
+      },
+      body:JSON.stringify({
+        message:requestText,
+        model:selectedGeminiModel
+      })
     });
 
-    const data=await response.json();
-    if(!response.ok)throw new Error(data.error||"The server returned an error.");
-
+    const data=await readJsonResponse(response);
     const reply=data.reply||"I couldn't generate a response. Please try again.";
+
+    setModelStatus("available","AVAILABLE");
+
     await revealReply(loading.bubble,reply);
-    history.push({role:"user",content:currentUserContent},{role:"assistant",content:reply});
+
+    history.push(
+      {role:"user",content:currentUserContent},
+      {role:"assistant",content:reply}
+    );
+
     addCopyButton(loading.row.querySelector(".message-body"),reply);
 
   }catch(error){
-    loading.bubble.textContent="Sorry, something went wrong: "+error.message;
-    showToast(error.message);
+    const isUnavailable=error.unavailable ||
+      error.message==="UNAVAILABLE NOW TRY LATER" ||
+      /busy|overload|quota|rate.?limit|resource_exhausted|unavailable|temporar|timeout/i.test(error.message||"");
+
+    if(isUnavailable){
+      setModelStatus("unavailable","UNAVAILABLE NOW TRY LATER");
+
+      loading.bubble.textContent=
+        "UNAVAILABLE NOW TRY LATER. This model may be busy or temporarily unavailable. Please try again in a little while or select another model.";
+
+      showToast("UNAVAILABLE NOW TRY LATER");
+
+    }else{
+      setModelStatus("available","AVAILABLE · REQUEST FAILED");
+
+      loading.bubble.textContent="Sorry, something went wrong: "+error.message;
+      showToast(error.message);
+    }
+
   }finally{
     busy=false;
     sendBtn.disabled=false;
@@ -796,6 +1024,7 @@ function newChat(){
   }
 
   history=[];
+
   chatContent.innerHTML=`
     <div class="welcome" id="welcome">
       <div class="welcome-mark">
@@ -830,6 +1059,7 @@ function resizeInput(){
 }
 
 input.addEventListener("input",resizeInput);
+
 input.addEventListener("keydown",event=>{
   if(event.key==="Enter"&&!event.shiftKey){
     event.preventDefault();
@@ -848,6 +1078,8 @@ window.matchMedia("(prefers-color-scheme: light)").addEventListener?.("change",(
 setInterval(()=>{
   if(localStorage.getItem("rose_theme_pref")==="time-based")setTheme("time-based");
 },60000);
+
+loadGeminiModels();
 </script>
 </body>
 </html>
