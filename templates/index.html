@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My AI Assistant</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #10121b;
+    color: white;
+    height: 100vh;
+    display: flex;
+}
+
+/* Sidebar */
+
+.sidebar {
+    width: 250px;
+    background: #171a25;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #292d3b;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.new-chat {
+    background: #292e40;
+    border: 1px solid #41465b;
+    color: white;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+}
+
+.new-chat:hover {
+    background: #383e55;
+}
+
+.sidebar-text {
+    margin-top: 30px;
+    color: #858b9e;
+    font-size: 13px;
+}
+
+/* Main Area */
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.topbar {
+    height: 65px;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    border-bottom: 1px solid #292d3b;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.welcome {
+    margin: auto;
+    text-align: center;
+}
+
+.welcome h1 {
+    font-size: 34px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #7c8cff, #b68cff);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.welcome p {
+    color: #9298aa;
+}
+
+/* Messages */
+
+.message {
+    max-width: 75%;
+    padding: 15px 18px;
+    border-radius: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.user {
+    align-self: flex-end;
+    background: #354caa;
+}
+
+.bot {
+    align-self: flex-start;
+    background: #222737;
+}
+
+/* Input */
+
+.input-section {
+    padding: 20px 30px 25px;
+}
+
+.input-box {
+    max-width: 850px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    background: #202433;
+    border: 1px solid #41465b;
+    border-radius: 15px;
+    padding: 8px 10px;
+}
+
+.input-box input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+}
+
+.input-box input::placeholder {
+    color: #858b9e;
+}
+
+.send-btn {
+    background: #6378ff;
+    border: none;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.send-btn:hover {
+    background: #8291ff;
+}
+
+.footer {
+    text-align: center;
+    color: #73798b;
+    font-size: 11px;
+    margin-top: 12px;
+}
+
+/* Mobile */
+
+@media(max-width: 650px) {
+    .sidebar {
+        display: none;
+    }
+
+    .chat-area {
+        padding: 18px;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+
+    .welcome h1 {
+        font-size: 26px;
+    }
+
+    .input-section {
+        padding: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+
+    <div class="logo">🤖 My AI</div>
+
+    <button class="new-chat" onclick="newChat()">
+        + New Chat
+    </button>
+
+    <div class="sidebar-text">
+        Your AI assistant
+    </div>
+
+</div>
+
+<!-- Main Application -->
+
+<div class="main">
+
+    <div class="topbar">
+        My AI Assistant
+    </div>
+
+    <div class="chat-area" id="chatArea">
+
+        <div class="welcome" id="welcome">
+            <h1>How can I help you today?</h1>
+            <p>Ask anything. Explore everything.</p>
+        </div>
+
+    </div>
+
+    <!-- Input -->
+
+    <div class="input-section">
+
+        <div class="input-box">
+
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Message My AI..."
+                onkeydown="handleEnter(event)"
+            >
+
+            <button class="send-btn" onclick="sendMessage()">
+                ↑
+            </button>
+
+        </div>
+
+        <div class="footer">
+            My AI can make mistakes. Verify important information.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    const input = document.getElementById("userInput");
+    const chatArea = document.getElementById("chatArea");
+
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    const welcome = document.getElementById("welcome");
+
+    if (welcome) welcome.remove();
+
+    input.value = "";
+
+    addMessage(message, "user");
+
+    const loading = addMessage("Thinking...", "bot");
+
+    try {
+
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Server error");
+        }
+
+        loading.textContent = data.reply || "No response received.";
+
+    } catch (error) {
+
+        loading.textContent = "Error: " + error.message;
+
+    }
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function addMessage(text, type) {
+
+    const chatArea = document.getElementById("chatArea");
+
+    const message = document.createElement("div");
+
+    message.className = "message " + type;
+    message.textContent = text;
+
+    chatArea.appendChild(message);
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    return message;
+}
+
+function handleEnter(event) {
+
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+
+}
+
+function newChat() {
+
+    const chatArea = document.getElementById("chatArea");
+
+    chatArea.innerHTML = `
+        <div class="welcome" id="welcome">
+            <h1>How can I help you today?</h1>
+            <p>Ask anything. Explore everything.</p>
+        </div>
+    `;
+
+}
+
+</script>
+
+</body>
+</html>
