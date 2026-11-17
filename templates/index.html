@@ -61,7 +61,6 @@ body{overflow:hidden;background:var(--bg-base);color:var(--text-main);line-heigh
 button,input,select,textarea{font:inherit;color:inherit;outline:none}
 button{cursor:pointer}
 .app{height:100vh;width:100%;display:block}
-
 /* Rose-style slide-out menu */
 .sidebar{position:fixed;top:0;left:-360px;width:320px;max-width:88vw;height:100vh;z-index:10002;
   background:var(--bg-surface);box-shadow:var(--shadow-lg);padding:0;display:flex;flex-direction:column;gap:0;
@@ -158,7 +157,6 @@ button{cursor:pointer}
   background:var(--bg-surface);color:var(--text-main);font-size:12px;box-shadow:var(--shadow-lg);display:none;z-index:5000;max-width:min(90vw,520px)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10001;opacity:0;transition:opacity .3s ease}
 .overlay.show{display:block;opacity:1}
-
 /* Voice, document upload and appearance controls */
 .composer-tools{display:flex;align-items:center;gap:5px}
 .tool-btn{width:38px;height:38px;flex:0 0 38px;border:0;border-radius:var(--radius-md);background:transparent;color:var(--text-muted);font-size:17px;display:grid;place-items:center;transition:var(--transition-smooth)}
@@ -419,8 +417,9 @@ async function extractDocumentText(file){
   }
   throw new Error("Unsupported file type: "+file.name+". Upload PDF, DOCX or TXT.");
 }
-let availableModels = [];
-let selectedModel = "";
+
+let availableGeminiModels = [];
+let selectedGeminiModel = "";
 const modelStatuses = {};
 
 function setModelStatus(state, message){
@@ -432,40 +431,26 @@ function setModelStatus(state, message){
 
 function updateModelOptions(){
   const select=document.getElementById("modelSelect");
-  const current=selectedModel || select.value;
+  const current=selectedGeminiModel || select.value;
   select.innerHTML="";
 
-  const providers = [
-    {key:"gemini", label:"Google Gemini"},
-    {key:"openai", label:"OpenAI"}
-  ];
-
-  providers.forEach(provider=>{
-    const models=availableModels.filter(model=>model.provider===provider.key);
-    if(!models.length)return;
-    const group=document.createElement("optgroup");
-    group.label=provider.label;
-    models.forEach(model=>{
-      const option=document.createElement("option");
-      option.value=model.name;
-      option.textContent=model.display_name;
-      group.appendChild(option);
-    });
-    select.appendChild(group);
+  // The dropdown contains only the six models returned by /models.
+  availableGeminiModels.forEach(model=>{
+    const option=document.createElement("option");
+    option.value=model.name;
+    option.textContent=model.display_name;
+    select.appendChild(option);
   });
 
-  if(current && availableModels.some(model=>model.name===current)){
+  if(current && availableGeminiModels.some(m=>m.name===current)){
     select.value=current;
-    selectedModel=current;
-  }else if(availableModels.length){
-    selectedModel=availableModels[0].name;
-    select.value=selectedModel;
+    selectedGeminiModel=current;
   }
   updateSelectedModelStatus();
 }
 
 function updateSelectedModelStatus(){
-  const status=modelStatuses[selectedModel] || "ready";
+  const status=modelStatuses[selectedGeminiModel] || "ready";
   if(status==="fast"){
     setModelStatus("available","FAST");
   }else if(status==="busy"){
@@ -504,20 +489,20 @@ async function loadGeminiModels(){
       cache:"no-store"
     });
     const data=await readJsonResponse(response);
-    availableModels=Array.isArray(data.models)?data.models:[];
+    availableGeminiModels=Array.isArray(data.models)?data.models:[];
 
-    if(!availableModels.length){
-      select.innerHTML='<option value="">No API keys configured</option>';
+    if(!availableGeminiModels.length){
+      select.innerHTML='<option value="">No models configured</option>';
       setModelStatus("unavailable","NOT AVAILABLE");
       return;
     }
 
-    // Keep the previous Gemini default when that provider is configured.
-    const preferred=availableModels.find(
-      model=>model.name==="gemini:gemini-3.5-flash-lite"
-    ) || availableModels[0];
+    // Default selection: Gemini 3.5 Flash Lite.
+    const preferred=availableGeminiModels.find(
+      m=>m.name==="gemini-3.5-flash-lite"
+    ) || availableGeminiModels[0];
 
-    selectedModel=preferred.name;
+    selectedGeminiModel=preferred.name;
     updateModelOptions();
   }catch(error){
     select.innerHTML='<option value="">Models unavailable</option>';
@@ -527,7 +512,7 @@ async function loadGeminiModels(){
 }
 
 document.getElementById("modelSelect").addEventListener("change",event=>{
-  selectedModel=event.target.value;
+  selectedGeminiModel=event.target.value;
   updateSelectedModelStatus();
 });
 
@@ -656,7 +641,6 @@ async function sendMessage(){
   const visibleQuestion=question||(filesToSend.length?"Please analyse the attached document(s).":"");
   addMessage(visibleQuestion+(filesToSend.length?"\n\n📎 "+filesToSend.map(f=>f.name).join(", "):""),"user");
   const loading=addMessage("","bot",true);
-  const modelForRequest=selectedModel;
   try{
     let documentContext="";
     if(filesToSend.length){
@@ -670,7 +654,7 @@ async function sendMessage(){
     const currentUserContent=visibleQuestion+(documentContext?"\n\nAttached document content:"+documentContext:"");
     const requestText=[...history,{role:"user",content:currentUserContent}]
       .map(item=>(item.role==="user"?"User":"ROSE AI")+":\n"+item.content).join("\n\n");
-    if(!modelForRequest){
+    if(!selectedGeminiModel){
       throw new Error("UNAVAILABLE NOW TRY LATER");
     }
 
@@ -679,19 +663,19 @@ async function sendMessage(){
     const chatStarted=performance.now();
     const response=await fetch("/chat",{
       method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},
-      body:JSON.stringify({message:requestText,model:modelForRequest})
+      body:JSON.stringify({message:requestText,model:selectedGeminiModel})
     });
     const data=await readJsonResponse(response);
     const reply=data.reply||"I couldn't generate a response. Please try again.";
     const elapsed=(performance.now()-chatStarted)/1000;
     const actualStatus=elapsed<=2.5?"fast":"busy";
-    modelStatuses[modelForRequest]=data.status||actualStatus;
+    modelStatuses[selectedGeminiModel]=actualStatus;
     updateSelectedModelStatus();
     await revealReply(loading.bubble,reply);
     history.push({role:"user",content:currentUserContent},{role:"assistant",content:reply});
     addCopyButton(loading.row.querySelector(".message-body"),reply);
   }catch(error){
-    modelStatuses[modelForRequest]="unavailable";
+    modelStatuses[selectedGeminiModel]="unavailable";
     updateSelectedModelStatus();
     loading.bubble.textContent="NOT AVAILABLE · This model did not respond successfully. Please try again later or select another model.";
     showToast("NOT AVAILABLE · Try another model or check again later.");
